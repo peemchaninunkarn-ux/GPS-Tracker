@@ -1,13 +1,10 @@
-# GPS Tracking
+GPS Tracking
 
-ชุดไฟล์สำหรับอัปโหลดขึ้น GitHub Pages
+อัปโหลดไฟล์ทั้งหมดในโฟลเดอร์นี้ไปไว้ที่ root ของ GitHub repository GPS-Tracker
+ต้องมีไฟล์ index.html, manifest.webmanifest, service-worker.js, icon-192.png, icon-512.png อยู่ระดับเดียวกัน
 
-## ไฟล์หลัก
-- `index.html` หน้าเว็บหลัก
-- `manifest.webmanifest` สำหรับติดตั้งเป็น PWA
-- `service-worker.js` สำหรับแคชไฟล์
-- `icon-192.png` และ `icon-512.png` ไอคอนแอป
-- `GPS_Firebase_A7670E_GPS_TRACKING.ino` โค้ด ESP32
+เปิดใช้งาน:
+https://peemchaninunkarn-ux.github.io/GPS-Tracker/
 
-## วิธีใช้
-อัปโหลดไฟล์ทั้งหมดในโฟลเดอร์นี้ขึ้น GitHub repository แล้วเปิด GitHub Pages จาก branch `main` และ folder `/root`
+Android: เปิดด้วย Chrome > เมนูสามจุด > Install app หรือ Add to Home screen
+ถ้ายังไม่ขึ้น ให้เปิดลิงก์ 2-3 ครั้ง หรือ Clear site data ของ github.io แล้วลองใหม่
