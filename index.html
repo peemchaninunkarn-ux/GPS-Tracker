@@ -77,8 +77,9 @@ const firebaseHistoryURL="https://gps-tracker-a20ca-default-rtdb.asia-southeast1
 const POLL_MS=1000;
 const NO_DATA_OFFLINE_MS=60000;      // ถ้าไม่ได้รับข้อมูลจาก Firebase 60 วิ = offline
 const STOP_TO_OFFLINE_MS=180000;     // ตามที่ขอ: ถ้ารถไม่เคลื่อนเกิน 3 นาที = offline
-const GPS_MOVE_THRESHOLD_M=2.5, STOP_DRIFT_THRESHOLD_M=10, ROUTE_POINT_MIN_M=2;
-const MIN_REAL_SPEED_KMH=2, MIN_RAW_MOVING_SPEED_KMH=5, MAX_REASONABLE_SPEED_KMH=180, SMOOTH_STEPS=6, SMOOTH_DELAY_MS=18;
+const GPS_MOVE_THRESHOLD_M=1.2, STOP_DRIFT_THRESHOLD_M=10, ROUTE_POINT_MIN_M=2;
+const MIN_REAL_SPEED_KMH=2, MIN_RAW_MOVING_SPEED_KMH=5, MAX_REASONABLE_SPEED_KMH=180, SMOOTH_STEPS=5, SMOOTH_DELAY_MS=16;
+const MOVING_HOLD_MS=12000;       // กันสถานะกำลังวิ่งเด้งเป็นจอดเวลาสัญญาณ GPS แกว่งสั้น ๆ
 let currentLat=13.7563,currentLon=100.5018,isFirstLoad=true,autoFollow=true,routePoints=[],routeLine=null,routeVisible=true;
 let firstOnlineTime=0,lastDataTime=0,lastMoveTime=Date.now(),lastAcceptedLat=null,lastAcceptedLon=null,lastAcceptedTime=0,displaySpeed=0,maxSpeed=0,totalDistance=0,smoothTimer=null,lastPlaceLookup=0,placeCache={},historyPoints=[],historyLine=null,historyStartMarker=null,historyEndMarker=null,viewingHistory=false,replayTimer=null,replayMarker=null,deferredInstallPrompt=null;
 function openMenu(){document.body.classList.add('menu-open')}function closeMenu(){document.body.classList.remove('menu-open')}window.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
@@ -99,24 +100,55 @@ function processGPS(data){
  const now=Date.now(),lat=Number(data.latitude),lon=Number(data.longitude);if(!isFinite(lat)||!isFinite(lon)||lat===0||lon===0)return;
  lastDataTime=now;if(!firstOnlineTime)firstOnlineTime=now;
  const sat=data.satellites??'-',esp=Math.abs(Number(data.speed??0)),raw=Math.abs(Number(data.rawSpeed??data.gpsSpeed??esp)),seq=data.sequence??'-';
- let drift=map.distance([currentLat,currentLon],[lat,lon]),dist=0,dt=0,calcSpeed=0;if(lastAcceptedLat!==null){dist=map.distance([lastAcceptedLat,lastAcceptedLon],[lat,lon]);dt=now-lastAcceptedTime;calcSpeed=realSpeed(dist,dt)}
- const movingBySpeed=raw>=MIN_RAW_MOVING_SPEED_KMH||esp>=MIN_RAW_MOVING_SPEED_KMH||calcSpeed>=MIN_REAL_SPEED_KMH;
- const movingByDistance=dist>=GPS_MOVE_THRESHOLD_M&&calcSpeed>=MIN_REAL_SPEED_KMH;
- const isMoving=isFirstLoad?false:(movingBySpeed||movingByDistance);
- let motion=isMoving?'กำลังวิ่ง':'จอดอยู่';
- if(isFirstLoad){currentLat=lat;currentLon=lon;lastAcceptedLat=lat;lastAcceptedLon=lon;lastAcceptedTime=now;displaySpeed=0;marker.setLatLng([lat,lon]);updateRoute(lat,lon);lastMoveTime=now;}
- else if(isMoving){lastMoveTime=now;const oldLat=currentLat,oldLon=currentLon,selected=selectSpeed(raw,esp,calcSpeed,true);displaySpeed=selected>0?(displaySpeed*.15)+(selected*.85):0;if(displaySpeed<MIN_REAL_SPEED_KMH)displaySpeed=0;if(displaySpeed>maxSpeed)maxSpeed=displaySpeed;if(dist>=GPS_MOVE_THRESHOLD_M)totalDistance+=dist;currentLat=lat;currentLon=lon;lastAcceptedLat=lat;lastAcceptedLon=lon;lastAcceptedTime=now;rotateTruck(bearingDeg(oldLat,oldLon,lat,lon));smoothMoveMarker(oldLat,oldLon,lat,lon);updateRoute(lat,lon);if(autoFollow&&!viewingHistory)map.panTo([lat,lon],{animate:true,duration:.25});}
- else {displaySpeed=0;}
- // สถานะ Online/Offline ตามที่ขอ: วิ่ง = online, หยุดเกิน 3 นาที = offline, หรือถ้าไม่มีข้อมูลเกิน 60 วิ = offline
+ let drift=map.distance([currentLat,currentLon],[lat,lon]),dist=0,dt=0,calcSpeed=0;
+ if(lastAcceptedLat!==null){dist=map.distance([lastAcceptedLat,lastAcceptedLon],[lat,lon]);dt=now-lastAcceptedTime;calcSpeed=realSpeed(dist,dt)}
+
+ // V2 Stable Motion:
+ // 1) ตัดสินการวิ่งจาก "พิกัดขยับจริง" เป็นหลัก เพื่อไม่ให้ Raw Speed เพี้ยนตอนจอดหลอก
+ // 2) ใช้ Raw Speed เป็นค่าความเร็วแสดงผลเมื่อระบบมั่นใจว่ารถกำลังเคลื่อนที่แล้ว
+ // 3) ค้างสถานะกำลังวิ่งไว้ 12 วิ เพื่อกันเด้งเป็นจอดเวลาสัญญาณหาย/จุด GPS มาช้า
+ const speedHint=Math.max(raw,esp,calcSpeed);
+ const movedSmall=dist>=GPS_MOVE_THRESHOLD_M;
+ const movedClear=dist>=3.0;
+ const speedSaysMoving=speedHint>=MIN_RAW_MOVING_SPEED_KMH;
+ const calcSaysMoving=calcSpeed>=MIN_REAL_SPEED_KMH;
+ const instantMoving=(movedSmall && speedSaysMoving) || movedClear || calcSaysMoving;
+ if(instantMoving) lastMoveTime=now;
+ const isMoving=!isFirstLoad && (instantMoving || (now-lastMoveTime<=MOVING_HOLD_MS));
+ const motion=isMoving?'กำลังวิ่ง':'จอดอยู่';
+
+ if(isFirstLoad){
+   currentLat=lat;currentLon=lon;lastAcceptedLat=lat;lastAcceptedLon=lon;lastAcceptedTime=now;displaySpeed=0;marker.setLatLng([lat,lon]);updateRoute(lat,lon);lastMoveTime=now;
+ }else{
+   // อัปเดตตำแหน่งเมื่อขยับจริง แม้ความเร็ว GPS จะมาช้า เพื่อให้ marker ไม่ดีเลย์
+   const acceptPosition = movedSmall || isMoving;
+   if(acceptPosition){
+     const oldLat=currentLat,oldLon=currentLon;
+     const selected=selectSpeed(raw,esp,calcSpeed,isMoving);
+     displaySpeed=isMoving ? selected : 0; // ใช้ค่าจริงทันที ไม่ทำ average หนัก เพื่อลดดีเลย์
+     if(displaySpeed<MIN_REAL_SPEED_KMH)displaySpeed=0;
+     if(displaySpeed>maxSpeed)maxSpeed=displaySpeed;
+     if(dist>=GPS_MOVE_THRESHOLD_M)totalDistance+=dist;
+     currentLat=lat;currentLon=lon;lastAcceptedLat=lat;lastAcceptedLon=lon;lastAcceptedTime=now;
+     if(map.distance([oldLat,oldLon],[lat,lon])>=0.5){rotateTruck(bearingDeg(oldLat,oldLon,lat,lon));smoothMoveMarker(oldLat,oldLon,lat,lon);}
+     updateRoute(lat,lon);
+     if(autoFollow&&!viewingHistory)map.panTo([lat,lon],{animate:true,duration:.2});
+   }else{
+     displaySpeed=0;
+   }
+ }
+
+ // Connection: ถ้ามีข้อมูลใหม่เข้ามาและยังไม่หยุดเกิน 3 นาที = online
+ // ถ้ารถกำลังวิ่ง ให้ online เสมอ
  const connectionOk=(now-lastDataTime)<=NO_DATA_OFFLINE_MS;
  const stoppedTooLong=!isMoving && !isFirstLoad && (now-lastMoveTime>STOP_TO_OFFLINE_MS);
- setStatus((connectionOk&&!stoppedTooLong)?'online':'offline');
+ setStatus((connectionOk && (isMoving || !stoppedTooLong))?'online':'offline');
  setText('motion',motion);setText('motionTop',motion);setText('latlon',lat.toFixed(7)+', '+lon.toFixed(7));setText('sat',sat);setText('satTop',sat);setText('speed',displaySpeed.toFixed(2)+' km/h');setText('speedTop',displaySpeed.toFixed(2));setText('rawSpeed',raw.toFixed(2)+' km/h');setText('drift',drift.toFixed(1)+' m');setText('totalDistance',formatDistance(totalDistance));setText('totalTop',formatDistance(totalDistance));setText('maxSpeedTop',maxSpeed.toFixed(2));setText('onlineTime',formatDuration(now-firstOnlineTime));setText('seqtime',`${seq} / ${new Date(lastDataTime).toLocaleString('th-TH')}`);const googleURL=`https://www.google.com/maps?q=${lat},${lon}`;document.getElementById('googleMapsBtn').href=googleURL;
  marker.setPopupContent(`<b>🚚 รถขนส่ง</b><br>Connection: ${document.getElementById('status').textContent}<br>Motion: ${motion}<br>Speed: ${displaySpeed.toFixed(2)} km/h<br>Raw: ${raw.toFixed(2)} km/h<br>Sat: ${sat}<br>Total: ${formatDistance(totalDistance)}<br>Seq: ${seq}`);
  updateCurrentPlace(lat,lon,isMoving);if(isFirstLoad){if(!viewingHistory)map.setView([lat,lon],17);marker.openPopup();isFirstLoad=false;}
 }
 async function loadGPS(){try{const res=await fetch(firebaseURL+'?t='+Date.now(),{cache:'no-store'});const data=await res.json();processGPS(data)}catch(e){console.log(e)}}
-setInterval(()=>{const now=Date.now();if(lastDataTime && now-lastDataTime>NO_DATA_OFFLINE_MS)setStatus('offline');if(lastDataTime && now-lastMoveTime>STOP_TO_OFFLINE_MS)setStatus('offline')},1000);
+setInterval(()=>{const now=Date.now();if(lastDataTime && now-lastDataTime>NO_DATA_OFFLINE_MS)setStatus('offline');},1000);
 function cleanupHistoryMarkers(){if(historyLine){map.removeLayer(historyLine);historyLine=null}if(historyStartMarker){map.removeLayer(historyStartMarker);historyStartMarker=null}if(historyEndMarker){map.removeLayer(historyEndMarker);historyEndMarker=null}}function showLiveRoute(){cleanupHistoryMarkers();viewingHistory=false;if(routeLine&&routeVisible)routeLine.addTo(map);map.setView([currentLat,currentLon],17)}function normalizeHistoryObject(obj){if(!obj)return[];return Object.keys(obj).map(k=>{const v=obj[k]||{};return{key:k,lat:Number(v.latitude),lon:Number(v.longitude),speed:Math.abs(Number(v.rawSpeed??v.speed??0)),sat:v.satellites??'-',sequence:Number(v.sequence??0),deviceMillis:Number(v.deviceMillis??v.savedAt??0)}}).filter(p=>isFinite(p.lat)&&isFinite(p.lon)&&p.lat!==0&&p.lon!==0).sort((a,b)=>(a.sequence||a.deviceMillis)-(b.sequence||b.deviceMillis))}
 function selectedHistorySamples(points){if(points.length<=12)return points.map((p,i)=>({p,i,label:i===0?'เริ่ม':(i===points.length-1?'สิ้นสุด':'ผ่าน')}));const out=[{p:points[0],i:0,label:'เริ่ม'}],step=Math.max(1,Math.floor(points.length/8));for(let i=step;i<points.length-1;i+=step){out.push({p:points[i],i,label:'ผ่าน'});if(out.length>=10)break}out.push({p:points[points.length-1],i:points.length-1,label:'สิ้นสุด'});return out}async function renderHistoryPlaces(points){const tbody=document.getElementById('historyTableBody'),samples=selectedHistorySamples(points);tbody.innerHTML=samples.map((x,idx)=>`<tr id="histRow${idx}"><td>${x.label}</td><td>${x.p.sequence||x.i}</td><td class="place-text">กำลังค้นหาชื่อสถานที่...</td><td>${x.p.speed.toFixed(1)} km/h</td></tr>`).join('');if(!points.length)return;setText('startPlace',await reverseGeocode(points[0].lat,points[0].lon));await sleep(1100);setText('endPlace',await reverseGeocode(points[points.length-1].lat,points[points.length-1].lon));for(let idx=0;idx<samples.length;idx++){const x=samples[idx],place=await reverseGeocode(x.p.lat,x.p.lon),row=document.getElementById('histRow'+idx);if(row){row.cells[2].textContent=place;row.style.cursor='pointer';row.onclick=()=>{map.setView([x.p.lat,x.p.lon],18);L.popup().setLatLng([x.p.lat,x.p.lon]).setContent(`<b>${x.label}</b><br>${place}<br>Speed: ${x.p.speed.toFixed(1)} km/h`).openOn(map)}}await sleep(1100)}}
 function renderHistory(points){cleanupHistoryMarkers();historyPoints=points;viewingHistory=true;if(routeLine)map.removeLayer(routeLine);if(!points.length){alert('ยังไม่มีข้อมูลประวัติใน Firebase');setText('historyCount','0 จุด');return}const latlngs=points.map(p=>[p.lat,p.lon]);let distance=0,historyMax=0;for(let i=1;i<latlngs.length;i++)distance+=map.distance(latlngs[i-1],latlngs[i]);for(const p of points)if(p.speed>historyMax&&p.speed<=MAX_REASONABLE_SPEED_KMH)historyMax=p.speed;historyLine=L.polyline(latlngs,{weight:6,opacity:.9,smoothFactor:.2}).addTo(map);historyStartMarker=L.marker(latlngs[0]).addTo(map).bindPopup('✅ จุดเริ่มต้น');historyEndMarker=L.marker(latlngs[latlngs.length-1]).addTo(map).bindPopup('🏁 จุดสิ้นสุด');map.fitBounds(historyLine.getBounds(),{padding:[30,30]});setText('historyCount',points.length+' จุด');setText('historyDistance',formatDistance(distance));setText('historyMaxSpeed',historyMax.toFixed(2)+' km/h');renderHistoryPlaces(points)}async function loadHistoryRoute(){try{setText('historyCount','กำลังโหลด...');const res=await fetch(firebaseHistoryURL+'?t='+Date.now(),{cache:'no-store'});renderHistory(normalizeHistoryObject(await res.json()))}catch(e){alert('โหลดประวัติไม่สำเร็จ');setText('historyCount','โหลดไม่สำเร็จ')}}
