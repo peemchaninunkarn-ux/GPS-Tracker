@@ -85,7 +85,7 @@ header{background:var(--blue);color:white;padding:14px 16px;text-align:center;fo
 <script>
 const firebaseURL = "https://gps-tracker-a20ca-default-rtdb.asia-southeast1.firebasedatabase.app/vehicle/location.json";
 const firebaseHistoryURL = "https://gps-tracker-a20ca-default-rtdb.asia-southeast1.firebasedatabase.app/vehicle/history.json";
-const OFFLINE_LIMIT_MS=15000, GPS_MOVE_THRESHOLD_M=2.5, STOP_DRIFT_THRESHOLD_M=10, FORCE_MOVE_DISTANCE_M=8, ROUTE_POINT_MIN_M=2, MIN_REAL_SPEED_KMH=2, MIN_RAW_MOVING_SPEED_KMH=5, MAX_REASONABLE_SPEED_KMH=180, SMOOTH_STEPS=6, SMOOTH_DELAY_MS=18;
+const OFFLINE_LIMIT_MS=30000, GPS_MOVE_THRESHOLD_M=2.5, STOP_DRIFT_THRESHOLD_M=10, FORCE_MOVE_DISTANCE_M=8, ROUTE_POINT_MIN_M=2, MIN_REAL_SPEED_KMH=2, MIN_RAW_MOVING_SPEED_KMH=5, MAX_REASONABLE_SPEED_KMH=180, SMOOTH_STEPS=6, SMOOTH_DELAY_MS=18;
 let currentLat=13.7563,currentLon=100.5018,isFirstLoad=true,autoFollow=true,routePoints=[],routeLine=null,routeVisible=true,lastSignature=null,lastFreshTime=0,firstOnlineTime=0,lastAcceptedLat=null,lastAcceptedLon=null,lastAcceptedTime=0,displaySpeed=0,maxSpeed=0,totalDistance=0,smoothTimer=null,lastPlaceLookup=0,placeCache={},historyPoints=[],historyLine=null,historyStartMarker=null,historyEndMarker=null,viewingHistory=false,replayTimer=null,replayMarker=null,deferredInstallPrompt=null;
 
 function openMenu(){ document.body.classList.add('menu-open'); }
