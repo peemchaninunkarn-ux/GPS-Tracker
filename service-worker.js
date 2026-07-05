@@ -10,21 +10,17 @@ const APP_SHELL = [
   'https://unpkg.com/leaflet/dist/leaflet.js'
 ];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL).catch(() => null)));
+self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.map((key) => key !== CACHE_NAME ? caches.delete(key) : null))));
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key))))
+  );
   self.clients.claim();
 });
 
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-  if(url.href.includes('firebaseio.com') || url.href.includes('nominatim.openstreetmap.org') || url.href.includes('tile.openstreetmap.org')){
-    event.respondWith(fetch(event.request, {cache:'no-store'}).catch(() => caches.match(event.request)));
-    return;
-  }
-  event.respondWith(caches.match(event.request).then((cached) => cached || fetch(event.request)));
+self.addEventListener('fetch', event => {
+  event.respondWith(fetch(event.request));
 });
