@@ -1,21 +1,5 @@
-# GPS Tracking
+GPS Tracking Stable Motion V3
 
-เวอร์ชัน Stable Motion Logic
-
-ไฟล์สำหรับอัปโหลดขึ้น GitHub Pages:
-- index.html
-- manifest.webmanifest
-- service-worker.js
-- icon-192.png
-- icon-512.png
-
-วิธีใช้:
-1. แตก ZIP
-2. อัปโหลดไฟล์ทั้งหมดขึ้น GitHub Repository ที่ root
-3. Commit
-4. เปิดลิงก์ https://peemchaninunkarn-ux.github.io/GPS-Tracker/index.html
-
-หมายเหตุ:
-- service-worker.js เวอร์ชันนี้ไม่ cache ข้อมูล Firebase เพื่อไม่ให้ตำแหน่งค้าง
-- รถวิ่ง = Online ตลอด
-- รถหยุดเกิน 3 นาที = Offline ตามที่ตั้งไว้
+- แปลงความเร็ว GPS เป็น km/h ด้วยตัวคูณ 3.6
+- แก้สถานะกำลังวิ่ง/จอดให้นิ่งขึ้น
+- ลด false moving ตอนจอดและลดดีเลย์ตอนรถออกตัว

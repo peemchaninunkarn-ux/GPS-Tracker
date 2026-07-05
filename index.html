@@ -78,10 +78,14 @@ const POLL_MS=1000;
 const NO_DATA_OFFLINE_MS=60000;      // ถ้าไม่ได้รับข้อมูลจาก Firebase 60 วิ = offline
 const STOP_TO_OFFLINE_MS=180000;     // ตามที่ขอ: ถ้ารถไม่เคลื่อนเกิน 3 นาที = offline
 const GPS_MOVE_THRESHOLD_M=1.2, STOP_DRIFT_THRESHOLD_M=10, ROUTE_POINT_MIN_M=2;
-const MIN_REAL_SPEED_KMH=2, MIN_RAW_MOVING_SPEED_KMH=5, MAX_REASONABLE_SPEED_KMH=180, SMOOTH_STEPS=5, SMOOTH_DELAY_MS=16;
+const MIN_REAL_SPEED_KMH=2, MIN_RAW_MOVING_SPEED_KMH=8, MAX_REASONABLE_SPEED_KMH=180, SMOOTH_STEPS=5, SMOOTH_DELAY_MS=16;
+// A7670E บางชุดส่งความเร็ว GPS เป็น m/s จึงต้องคูณ 3.6 ให้เป็น km/h
+const GPS_SPEED_SCALE=3.6;
+const MOVE_DISTANCE_START_M=5;      // รถต้องขยับอย่างน้อย 5m จึงเริ่มนับว่าเคลื่อนที่
+const STOP_CONFIRM_MS=18000;        // ต้องนิ่งต่อเนื่อง 18 วิ จึงเปลี่ยนจากกำลังวิ่งเป็นจอด
 const MOVING_HOLD_MS=12000;       // กันสถานะกำลังวิ่งเด้งเป็นจอดเวลาสัญญาณ GPS แกว่งสั้น ๆ
 let currentLat=13.7563,currentLon=100.5018,isFirstLoad=true,autoFollow=true,routePoints=[],routeLine=null,routeVisible=true;
-let firstOnlineTime=0,lastDataTime=0,lastMoveTime=Date.now(),lastAcceptedLat=null,lastAcceptedLon=null,lastAcceptedTime=0,displaySpeed=0,maxSpeed=0,totalDistance=0,smoothTimer=null,lastPlaceLookup=0,placeCache={},historyPoints=[],historyLine=null,historyStartMarker=null,historyEndMarker=null,viewingHistory=false,replayTimer=null,replayMarker=null,deferredInstallPrompt=null;
+let firstOnlineTime=0,lastDataTime=0,lastMoveTime=Date.now(),lastAcceptedLat=null,lastAcceptedLon=null,lastAcceptedTime=0,displaySpeed=0,maxSpeed=0,totalDistance=0,smoothTimer=null,lastPlaceLookup=0,placeCache={},historyPoints=[],historyLine=null,historyStartMarker=null,historyEndMarker=null,viewingHistory=false,replayTimer=null,replayMarker=null,deferredInstallPrompt=null,stableMoving=false,lastRealMoveTime=0,lastStopCandidateTime=0;
 function openMenu(){document.body.classList.add('menu-open')}function closeMenu(){document.body.classList.remove('menu-open')}window.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
 const map=L.map('map').setView([currentLat,currentLon],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map);
 const truckIcon=L.divIcon({html:'<div id="truckIcon" class="vehicle-icon">🚚</div>',className:'',iconSize:[42,42],iconAnchor:[21,21]});
@@ -91,7 +95,8 @@ function setStatus(mode){let text='รอข้อมูล...',cls='waiting';if
 function followCar(){map.setView([currentLat,currentLon],17);marker.openPopup()}function toggleAutoFollow(){autoFollow=!autoFollow;setText('autoFollowBtn',autoFollow?'🧭 Auto Follow: ON':'🧭 Auto Follow: OFF')}function toggleDarkMode(){document.body.classList.toggle('dark');localStorage.setItem('gpsDarkMode',document.body.classList.contains('dark')?'1':'0');setTimeout(()=>map.invalidateSize(),200)}if(localStorage.getItem('gpsDarkMode')==='1')document.body.classList.add('dark');
 function formatDistance(m){return m>=1000?(m/1000).toFixed(2)+' km':m.toFixed(0)+' m'}function formatDuration(ms){if(!ms||ms<0)return'-';const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return `${h} ชม. ${m} นาที ${sec} วิ`}function bearingDeg(a,b,c,d){const R=x=>x*Math.PI/180,D=x=>x*180/Math.PI;const y=Math.sin(R(d-b))*Math.cos(R(c));const x=Math.cos(R(a))*Math.sin(R(c))-Math.sin(R(a))*Math.cos(R(c))*Math.cos(R(d-b));return(D(Math.atan2(y,x))+360)%360}function rotateTruck(deg){const el=document.getElementById('truckIcon');if(el)el.style.transform=`rotate(${deg}deg)`}
 function realSpeed(distanceM,dtMs){if(dtMs<=0)return 0;const kmh=(distanceM/(dtMs/1000))*3.6;return(!isFinite(kmh)||kmh<MIN_REAL_SPEED_KMH||kmh>MAX_REASONABLE_SPEED_KMH)?0:kmh}
-function selectSpeed(raw,esp,calc,isMoving){if(!isMoving)return 0;if(raw>=MIN_RAW_MOVING_SPEED_KMH&&raw<=MAX_REASONABLE_SPEED_KMH)return raw;if(esp>=MIN_REAL_SPEED_KMH&&esp<=MAX_REASONABLE_SPEED_KMH)return esp;if(calc>=MIN_REAL_SPEED_KMH&&calc<=MAX_REASONABLE_SPEED_KMH)return calc;return 0}
+function convertGpsSpeed(v){const n=Math.abs(Number(v||0));const kmh=n*GPS_SPEED_SCALE;return kmh<=MAX_REASONABLE_SPEED_KMH?kmh:n}
+function selectSpeed(rawKmh,espKmh,calc,isMoving){if(!isMoving)return 0;if(rawKmh>=MIN_RAW_MOVING_SPEED_KMH&&rawKmh<=MAX_REASONABLE_SPEED_KMH)return rawKmh;if(espKmh>=MIN_RAW_MOVING_SPEED_KMH&&espKmh<=MAX_REASONABLE_SPEED_KMH)return espKmh;if(calc>=MIN_REAL_SPEED_KMH&&calc<=MAX_REASONABLE_SPEED_KMH)return calc;return 0}
 function smoothMoveMarker(a,b,c,d){if(smoothTimer)clearInterval(smoothTimer);let step=0;smoothTimer=setInterval(()=>{step++;const t=step/SMOOTH_STEPS,lat=a+(c-a)*t,lon=b+(d-b)*t;marker.setLatLng([lat,lon]);if(step>=SMOOTH_STEPS){clearInterval(smoothTimer);smoothTimer=null;marker.setLatLng([c,d])}},SMOOTH_DELAY_MS)}
 function updateRoute(lat,lon){const p=[lat,lon];if(!routePoints.length)routePoints.push(p);else if(map.distance(routePoints[routePoints.length-1],p)>=ROUTE_POINT_MIN_M)routePoints.push(p);if(routePoints.length>1200)routePoints.shift();if(routeLine)routeLine.setLatLngs(routePoints);else routeLine=L.polyline(routePoints,{weight:5,opacity:.85,smoothFactor:.3}).addTo(map);if(routeLine&&!routeVisible)map.removeLayer(routeLine)}function clearLiveRoute(){routePoints=[];totalDistance=0;maxSpeed=0;setText('totalDistance','0 m');setText('totalTop','0 m');setText('maxSpeedTop','0.00');if(routeLine){map.removeLayer(routeLine);routeLine=null}}function toggleRoute(){routeVisible=!routeVisible;if(routeLine){routeVisible?routeLine.addTo(map):map.removeLayer(routeLine)}}
 function placeKey(lat,lon){return lat.toFixed(4)+','+lon.toFixed(4)}function sleep(ms){return new Promise(r=>setTimeout(r,ms))}async function reverseGeocode(lat,lon){const key=placeKey(lat,lon);if(placeCache[key])return placeCache[key];try{const url=`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}&zoom=18&accept-language=th`;const res=await fetch(url,{headers:{Accept:'application/json'}});const data=await res.json(),addr=data.address||{};const parts=[data.name,addr.road,addr.suburb||addr.town||addr.village||addr.city_district,addr.city||addr.county||addr.state,addr.postcode].filter(Boolean);const place=parts.length?[...new Set(parts)].join(' '):`${lat.toFixed(6)}, ${lon.toFixed(6)}`;placeCache[key]=place;return place}catch(e){return `${lat.toFixed(6)}, ${lon.toFixed(6)}`}}async function updateCurrentPlace(lat,lon,isMoving){const now=Date.now();if(now-lastPlaceLookup<12000&&!isMoving)return;lastPlaceLookup=now;setText('currentPlace',await reverseGeocode(lat,lon))}
@@ -99,52 +104,59 @@ function processGPS(data){
  if(!data||data.latitude===undefined||data.longitude===undefined){return}
  const now=Date.now(),lat=Number(data.latitude),lon=Number(data.longitude);if(!isFinite(lat)||!isFinite(lon)||lat===0||lon===0)return;
  lastDataTime=now;if(!firstOnlineTime)firstOnlineTime=now;
- const sat=data.satellites??'-',esp=Math.abs(Number(data.speed??0)),raw=Math.abs(Number(data.rawSpeed??data.gpsSpeed??esp)),seq=data.sequence??'-';
+ const sat=data.satellites??'-',espRaw=Math.abs(Number(data.speed??0)),rawRaw=Math.abs(Number(data.rawSpeed??data.gpsSpeed??espRaw)),seq=data.sequence??'-';
+ const rawKmh=convertGpsSpeed(rawRaw),espKmh=convertGpsSpeed(espRaw);
  let drift=map.distance([currentLat,currentLon],[lat,lon]),dist=0,dt=0,calcSpeed=0;
  if(lastAcceptedLat!==null){dist=map.distance([lastAcceptedLat,lastAcceptedLon],[lat,lon]);dt=now-lastAcceptedTime;calcSpeed=realSpeed(dist,dt)}
 
- // V2 Stable Motion:
- // 1) ตัดสินการวิ่งจาก "พิกัดขยับจริง" เป็นหลัก เพื่อไม่ให้ Raw Speed เพี้ยนตอนจอดหลอก
- // 2) ใช้ Raw Speed เป็นค่าความเร็วแสดงผลเมื่อระบบมั่นใจว่ารถกำลังเคลื่อนที่แล้ว
- // 3) ค้างสถานะกำลังวิ่งไว้ 12 วิ เพื่อกันเด้งเป็นจอดเวลาสัญญาณหาย/จุด GPS มาช้า
- const speedHint=Math.max(raw,esp,calcSpeed);
- const movedSmall=dist>=GPS_MOVE_THRESHOLD_M;
- const movedClear=dist>=3.0;
- const speedSaysMoving=speedHint>=MIN_RAW_MOVING_SPEED_KMH;
- const calcSaysMoving=calcSpeed>=MIN_REAL_SPEED_KMH;
- const instantMoving=(movedSmall && speedSaysMoving) || movedClear || calcSaysMoving;
- if(instantMoving) lastMoveTime=now;
- const isMoving=!isFirstLoad && (instantMoving || (now-lastMoveTime<=MOVING_HOLD_MS));
+ // Stable Motion V3
+ // - ความเร็วจาก A7670E ถูกแปลงเป็น km/h (ส่วนใหญ่เป็น m/s × 3.6)
+ // - ไม่ใช้ raw speed เพียงอย่างเดียวเพื่อตัดสินว่ารถวิ่ง เพราะตอนจอด raw อาจแกว่ง
+ // - รถต้องมีระยะขยับจริง หรือ calcSpeed จริง จึงเริ่มเป็น "กำลังวิ่ง"
+ const speedHint=Math.max(rawKmh,espKmh,calcSpeed);
+ const movedClear=dist>=MOVE_DISTANCE_START_M;
+ const calcSaysMoving=calcSpeed>=8;
+ const speedAndMoved=(speedHint>=MIN_RAW_MOVING_SPEED_KMH && dist>=2.0);
+ const instantMoving=movedClear || calcSaysMoving || speedAndMoved;
+
+ if(instantMoving){
+   stableMoving=true;
+   lastRealMoveTime=now;
+   lastStopCandidateTime=0;
+ }else if(stableMoving){
+   if(!lastStopCandidateTime) lastStopCandidateTime=now;
+   if(now-lastStopCandidateTime>STOP_CONFIRM_MS) stableMoving=false;
+ }
+ const isMoving=!isFirstLoad && stableMoving;
  const motion=isMoving?'กำลังวิ่ง':'จอดอยู่';
 
  if(isFirstLoad){
-   currentLat=lat;currentLon=lon;lastAcceptedLat=lat;lastAcceptedLon=lon;lastAcceptedTime=now;displaySpeed=0;marker.setLatLng([lat,lon]);updateRoute(lat,lon);lastMoveTime=now;
+   currentLat=lat;currentLon=lon;lastAcceptedLat=lat;lastAcceptedLon=lon;lastAcceptedTime=now;displaySpeed=0;marker.setLatLng([lat,lon]);updateRoute(lat,lon);lastRealMoveTime=now;stableMoving=false;
  }else{
-   // อัปเดตตำแหน่งเมื่อขยับจริง แม้ความเร็ว GPS จะมาช้า เพื่อให้ marker ไม่ดีเลย์
-   const acceptPosition = movedSmall || isMoving;
+   // อัปเดตตำแหน่งเมื่อรถขยับจริงเท่านั้น เพื่อลดการลากเส้นหลอกจาก GPS drift
+   const acceptPosition = dist>=GPS_MOVE_THRESHOLD_M || isMoving;
    if(acceptPosition){
      const oldLat=currentLat,oldLon=currentLon;
-     const selected=selectSpeed(raw,esp,calcSpeed,isMoving);
-     displaySpeed=isMoving ? selected : 0; // ใช้ค่าจริงทันที ไม่ทำ average หนัก เพื่อลดดีเลย์
+     const selected=selectSpeed(rawKmh,espKmh,calcSpeed,isMoving);
+     displaySpeed=isMoving ? selected : 0;
      if(displaySpeed<MIN_REAL_SPEED_KMH)displaySpeed=0;
      if(displaySpeed>maxSpeed)maxSpeed=displaySpeed;
-     if(dist>=GPS_MOVE_THRESHOLD_M)totalDistance+=dist;
+     if(dist>=GPS_MOVE_THRESHOLD_M && isMoving)totalDistance+=dist;
      currentLat=lat;currentLon=lon;lastAcceptedLat=lat;lastAcceptedLon=lon;lastAcceptedTime=now;
      if(map.distance([oldLat,oldLon],[lat,lon])>=0.5){rotateTruck(bearingDeg(oldLat,oldLon,lat,lon));smoothMoveMarker(oldLat,oldLon,lat,lon);}
-     updateRoute(lat,lon);
+     if(isMoving)updateRoute(lat,lon);
      if(autoFollow&&!viewingHistory)map.panTo([lat,lon],{animate:true,duration:.2});
    }else{
      displaySpeed=0;
    }
  }
 
- // Connection: ถ้ามีข้อมูลใหม่เข้ามาและยังไม่หยุดเกิน 3 นาที = online
- // ถ้ารถกำลังวิ่ง ให้ online เสมอ
+ // Connection: ถ้ารถกำลังวิ่งให้ online, ถ้าจอดเกิน 3 นาทีค่อย offline ตามที่กำหนด
  const connectionOk=(now-lastDataTime)<=NO_DATA_OFFLINE_MS;
- const stoppedTooLong=!isMoving && !isFirstLoad && (now-lastMoveTime>STOP_TO_OFFLINE_MS);
+ const stoppedTooLong=!isMoving && !isFirstLoad && (now-lastRealMoveTime>STOP_TO_OFFLINE_MS);
  setStatus((connectionOk && (isMoving || !stoppedTooLong))?'online':'offline');
- setText('motion',motion);setText('motionTop',motion);setText('latlon',lat.toFixed(7)+', '+lon.toFixed(7));setText('sat',sat);setText('satTop',sat);setText('speed',displaySpeed.toFixed(2)+' km/h');setText('speedTop',displaySpeed.toFixed(2));setText('rawSpeed',raw.toFixed(2)+' km/h');setText('drift',drift.toFixed(1)+' m');setText('totalDistance',formatDistance(totalDistance));setText('totalTop',formatDistance(totalDistance));setText('maxSpeedTop',maxSpeed.toFixed(2));setText('onlineTime',formatDuration(now-firstOnlineTime));setText('seqtime',`${seq} / ${new Date(lastDataTime).toLocaleString('th-TH')}`);const googleURL=`https://www.google.com/maps?q=${lat},${lon}`;document.getElementById('googleMapsBtn').href=googleURL;
- marker.setPopupContent(`<b>🚚 รถขนส่ง</b><br>Connection: ${document.getElementById('status').textContent}<br>Motion: ${motion}<br>Speed: ${displaySpeed.toFixed(2)} km/h<br>Raw: ${raw.toFixed(2)} km/h<br>Sat: ${sat}<br>Total: ${formatDistance(totalDistance)}<br>Seq: ${seq}`);
+ setText('motion',motion);setText('motionTop',motion);setText('latlon',lat.toFixed(7)+', '+lon.toFixed(7));setText('sat',sat);setText('satTop',sat);setText('speed',displaySpeed.toFixed(2)+' km/h');setText('speedTop',displaySpeed.toFixed(2));setText('rawSpeed',rawKmh.toFixed(2)+' km/h');setText('drift',drift.toFixed(1)+' m');setText('totalDistance',formatDistance(totalDistance));setText('totalTop',formatDistance(totalDistance));setText('maxSpeedTop',maxSpeed.toFixed(2));setText('onlineTime',formatDuration(now-firstOnlineTime));setText('seqtime',`${seq} / ${new Date(lastDataTime).toLocaleString('th-TH')}`);const googleURL=`https://www.google.com/maps?q=${lat},${lon}`;document.getElementById('googleMapsBtn').href=googleURL;
+ marker.setPopupContent(`<b>🚚 รถขนส่ง</b><br>Connection: ${document.getElementById('status').textContent}<br>Motion: ${motion}<br>Speed: ${displaySpeed.toFixed(2)} km/h<br>Raw: ${rawKmh.toFixed(2)} km/h<br>Calc: ${calcSpeed.toFixed(2)} km/h<br>Move: ${dist.toFixed(1)} m<br>Sat: ${sat}<br>Total: ${formatDistance(totalDistance)}<br>Seq: ${seq}`);
  updateCurrentPlace(lat,lon,isMoving);if(isFirstLoad){if(!viewingHistory)map.setView([lat,lon],17);marker.openPopup();isFirstLoad=false;}
 }
 async function loadGPS(){try{const res=await fetch(firebaseURL+'?t='+Date.now(),{cache:'no-store'});const data=await res.json();processGPS(data)}catch(e){console.log(e)}}
