@@ -1,15 +1,5 @@
-const CACHE_NAME = 'gps-tracking-working-menu-v1';
-const APP_SHELL = [
-  './',
-  './index.html',
-  './manifest.webmanifest',
-  './service-worker.js',
-  './icon-192.png',
-  './icon-512.png',
-  'https://unpkg.com/leaflet/dist/leaflet.css',
-  'https://unpkg.com/leaflet/dist/leaflet.js'
-];
-
+// GPS Tracking - realtime friendly service worker
+// ไม่ cache ข้อมูล Firebase/แผนที่ เพื่อไม่ให้ตำแหน่งค้าง
 self.addEventListener('install', event => {
   self.skipWaiting();
 });

@@ -1,10 +1,21 @@
-GPS Tracking
+# GPS Tracking
 
-อัปโหลดไฟล์ทั้งหมดในโฟลเดอร์นี้ไปไว้ที่ root ของ GitHub repository GPS-Tracker
-ต้องมีไฟล์ index.html, manifest.webmanifest, service-worker.js, icon-192.png, icon-512.png อยู่ระดับเดียวกัน
+เวอร์ชัน Stable Motion Logic
 
-เปิดใช้งาน:
-https://peemchaninunkarn-ux.github.io/GPS-Tracker/
+ไฟล์สำหรับอัปโหลดขึ้น GitHub Pages:
+- index.html
+- manifest.webmanifest
+- service-worker.js
+- icon-192.png
+- icon-512.png
 
-Android: เปิดด้วย Chrome > เมนูสามจุด > Install app หรือ Add to Home screen
-ถ้ายังไม่ขึ้น ให้เปิดลิงก์ 2-3 ครั้ง หรือ Clear site data ของ github.io แล้วลองใหม่
+วิธีใช้:
+1. แตก ZIP
+2. อัปโหลดไฟล์ทั้งหมดขึ้น GitHub Repository ที่ root
+3. Commit
+4. เปิดลิงก์ https://peemchaninunkarn-ux.github.io/GPS-Tracker/index.html
+
+หมายเหตุ:
+- service-worker.js เวอร์ชันนี้ไม่ cache ข้อมูล Firebase เพื่อไม่ให้ตำแหน่งค้าง
+- รถวิ่ง = Online ตลอด
+- รถหยุดเกิน 3 นาที = Offline ตามที่ตั้งไว้
