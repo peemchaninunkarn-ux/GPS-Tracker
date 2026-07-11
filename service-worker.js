@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gps-tracking-professional-singlefile-v2';
+const CACHE_NAME = 'gps-tracking-menu-ui-v2';
 const APP_SCOPE = '/GPS-Tracker/';
 const APP_INDEX = '/GPS-Tracker/index.html';
 const APP_ASSETS = [
