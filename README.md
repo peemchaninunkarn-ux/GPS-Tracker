@@ -1,17 +1,14 @@
-GPS Tracking - PWA Path Fixed
+# GPS Tracking System
 
-ให้อัปโหลดไฟล์ทั้งหมดนี้ทับไฟล์เดิมใน GitHub Repository: GPS-Tracker
+ไฟล์ชุดนี้ปรับเฉพาะหน้าตาและการใช้งานของเว็บ โดยไม่แก้ logic GPS/Firebase/ความเร็ว
 
-ไฟล์ที่ต้องอยู่ระดับ root ของ repository:
-- index.html
-- manifest.webmanifest
-- service-worker.js
-- icon-192.png
-- icon-512.png
+การเปลี่ยนแปลง:
+- Header: GPS Tracking System
+- ย้าย ติดตามรถ / เปิด-ปิดเส้นทาง / ล้างเส้นทาง ไปไว้ในเมนู อื่น ๆ
+- ตัดคำว่า “สด” ออกจากข้อความทั้งหมด
+- เพิ่มเวลาอัปเดตล่าสุด
+- เพิ่มระดับสัญญาณ GPS จากจำนวนดาวเทียม
+- ปรับการหมุนไอคอนรถให้ลื่นขึ้นตามทิศทาง
+- ปรับ Popup และข้อความให้เป็นทางการขึ้น
 
-หลังอัปโหลด:
-1. ลบไอคอน GPS Tracking เดิมออกจากมือถือ
-2. เปิด Chrome แล้วเข้า https://peemchaninunkarn-ux.github.io/GPS-Tracker/index.html
-3. กดเมนู ⋮ แล้วเลือก Install app หรือ Add to Home screen ใหม่
-
-หมายเหตุ: ชุดนี้แก้เฉพาะ PWA path/start_url/scope/service-worker ไม่แตะ logic GPS, ความเร็ว, marker, Firebase
+อัปโหลดไฟล์ทั้งหมดไว้ที่ root ของ GitHub Repository GPS-Tracker

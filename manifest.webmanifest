@@ -1,12 +1,16 @@
 {
-  "name": "GPS Tracking",
+  "name": "GPS Tracking System",
   "short_name": "GPS Tracking",
   "description": "GPS Tracking System",
   "id": "/GPS-Tracker/",
   "start_url": "/GPS-Tracker/index.html",
   "scope": "/GPS-Tracker/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
   "orientation": "any",
   "background_color": "#eef2f7",
   "theme_color": "#0f5fad",

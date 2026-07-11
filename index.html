@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>GPS Tracking</title>
+<title>GPS Tracking System</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 <link rel="manifest" href="/GPS-Tracker/manifest.webmanifest">
 <meta name="theme-color" content="#0f5fad">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="GPS Tracking">
+<meta name="apple-mobile-web-app-title" content="GPS Tracking System">
 <link rel="apple-touch-icon" href="/GPS-Tracker/icon-192.png">
 <link rel="icon" href="/GPS-Tracker/icon-192.png">
 <style>
@@ -18,7 +18,7 @@
 body.dark{--bg:#0f172a;--panel:#111827;--text:#e5e7eb;--muted:#94a3b8;--line:#334155;--blue:#1d4ed8;--shadow:0 2px 14px rgba(0,0,0,.4)}
 *{box-sizing:border-box} body{margin:0;font-family:Arial,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
 header{background:var(--blue);color:white;padding:14px 16px;text-align:center;font-size:21px;font-weight:bold;position:sticky;top:0;z-index:1200;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;gap:10px}.app-title{line-height:1}.menu-btn{display:none;background:rgba(255,255,255,.16);color:white;border:0;border-radius:12px;width:44px;height:40px;font-size:24px;font-weight:bold;cursor:pointer}.close-btn{display:none;background:#ef4444;color:white;border:0;border-radius:12px;width:42px;height:38px;font-size:26px;line-height:1;cursor:pointer}.drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.dashboard{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:12px}.card{background:var(--panel);border-radius:14px;padding:12px;box-shadow:var(--shadow);border:1px solid var(--line)}.card-title{color:var(--muted);font-size:13px}.card-value{font-size:19px;font-weight:bold;margin-top:4px}.main{display:grid;grid-template-columns:390px 1fr;height:calc(100vh - 150px)}.side{background:var(--panel);padding:14px;box-shadow:2px 0 8px rgba(0,0,0,.15);overflow:auto;border-right:1px solid var(--line)}#map{width:100%;height:100%}.row{border-bottom:1px solid var(--line);padding:8px 0}.label{display:block;color:var(--muted);font-size:12px}.value{font-weight:bold;word-break:break-word}.online{color:var(--green)}.offline{color:var(--red)}.waiting{color:var(--yellow)}button,a.btn{display:block;width:100%;margin-top:8px;padding:12px;border-radius:11px;border:0;background:#1976d2;color:white;text-align:center;text-decoration:none;font-weight:bold;cursor:pointer}.btn-red{background:#dc2626}.btn-gray{background:#475569}.btn-green{background:#16a34a}.btn-orange{background:#f59e0b}.btn-purple{background:#7c3aed}.btn-teal{background:#0d9488}.btn-dark{background:#111827}.vehicle-icon{font-size:36px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.5));transform-origin:center center;transition:transform .18s linear}.panel{margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--bg)}.panel h3{margin:0 0 8px}.mini{font-size:12px;color:var(--muted);line-height:1.45}.history-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;background:var(--panel);border-radius:8px;overflow:hidden}.history-table th,.history-table td{border-bottom:1px solid var(--line);padding:7px;text-align:left;vertical-align:top}.history-table th{background:#e0f2fe;color:#075985}body.dark .history-table th{background:#1e3a8a;color:#dbeafe}.place-text{max-width:190px;line-height:1.35}.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#e0f2fe;color:#075985;font-size:12px;font-weight:bold}body.dark .pill{background:#1e3a8a;color:#dbeafe}.drawer-backdrop{display:none}
+.dashboard{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:12px}.card{background:var(--panel);border-radius:14px;padding:12px;box-shadow:var(--shadow);border:1px solid var(--line)}.card-title{color:var(--muted);font-size:13px}.card-value{font-size:19px;font-weight:bold;margin-top:4px}.main{display:grid;grid-template-columns:390px 1fr;height:calc(100vh - 150px)}.side{background:var(--panel);padding:14px;box-shadow:2px 0 8px rgba(0,0,0,.15);overflow:auto;border-right:1px solid var(--line)}#map{width:100%;height:100%}.row{border-bottom:1px solid var(--line);padding:8px 0}.label{display:block;color:var(--muted);font-size:12px}.value{font-weight:bold;word-break:break-word}.online{color:var(--green)}.offline{color:var(--red)}.waiting{color:var(--yellow)}button,a.btn{display:block;width:100%;margin-top:8px;padding:12px;border-radius:11px;border:0;background:#1976d2;color:white;text-align:center;text-decoration:none;font-weight:bold;cursor:pointer}.btn-red{background:#dc2626}.btn-gray{background:#475569}.btn-green{background:#16a34a}.btn-orange{background:#f59e0b}.btn-purple{background:#7c3aed}.btn-teal{background:#0d9488}.btn-dark{background:#111827}.vehicle-icon{font-size:36px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.5));transform-origin:center center;transition:transform .35s ease-out}.panel{margin-top:12px;border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--bg)}.panel h3{margin:0 0 8px}.mini{font-size:12px;color:var(--muted);line-height:1.45}.history-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;background:var(--panel);border-radius:8px;overflow:hidden}.history-table th,.history-table td{border-bottom:1px solid var(--line);padding:7px;text-align:left;vertical-align:top}.history-table th{background:#e0f2fe;color:#075985}body.dark .history-table th{background:#1e3a8a;color:#dbeafe}.place-text{max-width:190px;line-height:1.35}.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#e0f2fe;color:#075985;font-size:12px;font-weight:bold}body.dark .pill{background:#1e3a8a;color:#dbeafe}.drawer-backdrop{display:none}
 @media(max-width:980px){
   body{overflow-x:hidden}
   header{font-size:18px;padding:12px 12px;padding-top:calc(12px + env(safe-area-inset-top,0px));justify-content:center;min-height:58px}.menu-btn{display:block;position:absolute;left:12px;top:calc(9px + env(safe-area-inset-top,0px))}.app-title{font-size:20px}
@@ -29,17 +29,21 @@ header{background:var(--blue);color:white;padding:14px 16px;text-align:center;fo
   .history-table{font-size:11px}.history-table th,.history-table td{padding:6px 4px}.place-text{max-width:150px}button,a.btn{font-size:16px;padding:14px;border-radius:14px}.panel{border-radius:16px}
 }
 @media(max-width:430px){.dashboard{padding:10px;gap:10px}.card{min-height:82px}.card-title{font-size:14px}.card-value{font-size:24px}#map{height:44vh;min-height:330px}.app-title{font-size:19px}}
+
+.more-menu{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}.more-menu summary{list-style:none;cursor:pointer;padding:13px 14px;font-weight:700;display:flex;align-items:center;justify-content:space-between}.more-menu summary::-webkit-details-marker{display:none}.more-menu summary::after{content:"⌄";font-size:20px;transition:transform .2s}.more-menu[open] summary::after{transform:rotate(180deg)}.more-menu-content{padding:0 12px 12px}.signal-good{color:var(--green)}.signal-medium{color:var(--yellow)}.signal-weak{color:var(--red)}.app-subtitle{display:block;font-size:11px;font-weight:500;opacity:.82;margin-top:3px}.last-update-value{font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
-<header><button class="menu-btn" onclick="openMenu()" aria-label="เปิดเมนู">☰</button><div class="app-title">🚚 GPS Tracking</div></header>
+<header><button class="menu-btn" onclick="openMenu()" aria-label="เปิดเมนู">☰</button><div class="app-title">GPS Tracking System</div></header>
 <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeMenu()"></div>
 <div class="dashboard">
  <div class="card"><div class="card-title">สถานะ</div><div id="statusTop" class="card-value waiting">รอข้อมูล...</div></div>
  <div class="card"><div class="card-title">โหมดรถ</div><div id="motionTop" class="card-value">-</div></div>
  <div class="card"><div class="card-title">ความเร็ว</div><div class="card-value"><span id="speedTop">-</span> km/h</div></div>
  <div class="card"><div class="card-title">ดาวเทียม</div><div class="card-value"><span id="satTop">-</span> ดวง</div></div>
- <div class="card"><div class="card-title">ระยะทางสด</div><div class="card-value"><span id="totalTop">0</span></div></div>
+ <div class="card"><div class="card-title">ระดับสัญญาณ GPS</div><div id="gpsSignalTop" class="card-value waiting">รอข้อมูล...</div></div>
+ <div class="card"><div class="card-title">อัปเดตล่าสุด</div><div id="updateTimeTop" class="card-value last-update-value">-</div></div>
+ <div class="card"><div class="card-title">ระยะทาง</div><div class="card-value"><span id="totalTop">0</span></div></div>
  <div class="card"><div class="card-title">ความเร็วสูงสุด</div><div class="card-value"><span id="maxSpeedTop">0.00</span></div></div>
 </div>
 <div class="main">
@@ -49,25 +53,29 @@ header{background:var(--blue);color:white;padding:14px 16px;text-align:center;fo
   <div class="row"><span class="label">สถานะ</span><span id="status" class="value waiting">รอข้อมูล...</span></div>
   <div class="row"><span class="label">สถานะการเคลื่อนที่</span><span id="motion" class="value">-</span></div>
   <div class="row"><span class="label">Latitude / Longitude</span><span id="latlon" class="value">-</span></div>
-  <div class="row"><span class="label">Satellites</span><span id="sat" class="value">-</span></div>
-  <div class="row"><span class="label">Speed แสดงผล</span><span id="speed" class="value">-</span></div>
-  <div class="row"><span class="label">Raw Speed จาก GPS</span><span id="rawSpeed" class="value">-</span></div>
-  <div class="row"><span class="label">Distance drift</span><span id="drift" class="value">-</span></div>
-  <div class="row"><span class="label">ระยะทางสด</span><span id="totalDistance" class="value">0 m</span></div>
+  <div class="row"><span class="label">ดาวเทียม</span><span id="sat" class="value">-</span></div>
+  <div class="row"><span class="label">ระดับสัญญาณ GPS</span><span id="gpsSignal" class="value waiting">รอข้อมูล...</span></div>
+  <div class="row"><span class="label">ความเร็ว</span><span id="speed" class="value">-</span></div>
+  <div class="row"><span class="label">ระยะทาง</span><span id="totalDistance" class="value">0 m</span></div>
   <div class="row"><span class="label">เวลาที่ระบบออนไลน์</span><span id="onlineTime" class="value">-</span></div>
-  <div class="row"><span class="label">Sequence / อัปเดตล่าสุด</span><span id="seqtime" class="value">-</span></div>
+  <div class="row"><span class="label">อัปเดตล่าสุด</span><span id="updateTime" class="value last-update-value">-</span></div>
   <a id="googleMapsBtn" class="btn" target="_blank">🗺 เปิด Google Maps</a>
-  <button class="btn-green" onclick="followCar()">📍 ติดตามรถ</button>
   <button class="btn-orange" onclick="toggleAutoFollow()" id="autoFollowBtn">🧭 Auto Follow: ON</button>
-  <button class="btn-gray" onclick="toggleRoute()">🛣 เปิด/ปิดเส้นทางสด</button>
-  <button class="btn-red" onclick="clearLiveRoute()">🧹 ล้างเส้นทางสด</button>
   <button class="btn-dark" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+  <details class="more-menu">
+   <summary>⚙️ อื่น ๆ</summary>
+   <div class="more-menu-content">
+    <button class="btn-green" onclick="followCar()">📍 ติดตามรถ</button>
+    <button class="btn-gray" onclick="toggleRoute()">🛣 เปิด/ปิดเส้นทาง</button>
+    <button class="btn-red" onclick="clearLiveRoute()">🧹 ล้างเส้นทาง</button>
+   </div>
+  </details>
   <button class="btn-purple" onclick="installApp()" id="installBtn">📱 ติดตั้งเป็นแอป</button>
   <div class="mini">Android: Chrome → Install/Add to Home screen | iPhone: Share → Add to Home Screen</div>
   <div class="panel">
    <h3>📜 ประวัติการวิ่ง</h3>
    <button class="btn-purple" onclick="loadHistoryRoute()">โหลดประวัติจาก Firebase</button>
-   <button class="btn-teal" onclick="showLiveRoute()">กลับไปดูเส้นทางสด</button>
+   <button class="btn-teal" onclick="showLiveRoute()">กลับไปดูเส้นทาง</button>
    <button class="btn-gray" onclick="exportHistoryCSV()">⬇ Export CSV</button>
    <button class="btn-orange" onclick="replayHistoryRoute()">▶ Replay เส้นทางย้อนหลัง</button>
    <button class="btn-red" onclick="stopReplay()">⏹ หยุด Replay</button>
@@ -96,6 +104,9 @@ window.addEventListener('keydown', e => { if(e.key === 'Escape') closeMenu(); })
 const map=L.map("map").setView([currentLat,currentLon],13);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap contributors"}).addTo(map);
 const truckIcon=L.divIcon({html:'<div id="truckIcon" class="vehicle-icon">🚚</div>',className:"",iconSize:[42,42],iconAnchor:[21,21]});const marker=L.marker([currentLat,currentLon],{icon:truckIcon}).addTo(map).bindPopup("รอตำแหน่งรถ...");
 function setText(id,v){const e=document.getElementById(id); if(e)e.textContent=v}function setStatus(mode){let text="รอข้อมูล...",cls="waiting";if(mode==="online"){text="online";cls="online"}if(mode==="offline"){text="offline";cls="offline"}setText("status",text);setText("statusTop",text);document.getElementById("status").className="value "+cls;document.getElementById("statusTop").className="card-value "+cls}
+function getGpsSignal(sat){const n=Number(sat)||0;if(n>=16)return{text:"ดีมาก",cls:"signal-good"};if(n>=11)return{text:"ดี",cls:"signal-good"};if(n>=6)return{text:"ปานกลาง",cls:"signal-medium"};return{text:"อ่อน",cls:"signal-weak"}}
+function updateGpsSignal(sat){const s=getGpsSignal(sat);setText("gpsSignal",s.text);setText("gpsSignalTop",s.text);const a=document.getElementById("gpsSignal"),b=document.getElementById("gpsSignalTop");if(a)a.className="value "+s.cls;if(b)b.className="card-value "+s.cls}
+
 function followCar(){map.setView([currentLat,currentLon],17);marker.openPopup()}function toggleAutoFollow(){autoFollow=!autoFollow;setText("autoFollowBtn",autoFollow?"🧭 Auto Follow: ON":"🧭 Auto Follow: OFF")}function toggleDarkMode(){document.body.classList.toggle('dark');localStorage.setItem('gpsDarkMode',document.body.classList.contains('dark')?'1':'0');setTimeout(()=>map.invalidateSize(),200)}if(localStorage.getItem('gpsDarkMode')==='1')document.body.classList.add('dark');
 function formatDistance(m){return m>=1000?(m/1000).toFixed(2)+" km":m.toFixed(0)+" m"}function formatDuration(ms){if(!ms||ms<0)return"-";const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return `${h} ชม. ${m} นาที ${sec} วิ`}function bearingDeg(a,b,c,d){const R=x=>x*Math.PI/180,D=x=>x*180/Math.PI;const y=Math.sin(R(d-b))*Math.cos(R(c));const x=Math.cos(R(a))*Math.sin(R(c))-Math.sin(R(a))*Math.cos(R(c))*Math.cos(R(d-b));return(D(Math.atan2(y,x))+360)%360}function rotateTruck(deg){const el=document.getElementById("truckIcon");if(el)el.style.transform=`rotate(${deg}deg)`}
 function calculateRealSpeed(distanceM,dtMs){if(dtMs<=0)return 0;const kmh=(distanceM/(dtMs/1000))*3.6;if(!isFinite(kmh)||kmh<MIN_REAL_SPEED_KMH||kmh>MAX_REASONABLE_SPEED_KMH)return 0;return kmh}function dynamicMoveThreshold(speedKmh,distanceM){if(speedKmh>=50)return 2;if(speedKmh>=20)return 2.5;if(speedKmh>=8)return 3;if(speedKmh>=MIN_RAW_MOVING_SPEED_KMH)return 4;if(distanceM>=FORCE_MOVE_DISTANCE_M)return FORCE_MOVE_DISTANCE_M;return STOP_DRIFT_THRESHOLD_M}function chooseDisplaySpeed(raw,esp,real,moving){if(!moving)return 0;if(raw>=MIN_RAW_MOVING_SPEED_KMH&&raw<=MAX_REASONABLE_SPEED_KMH)return raw;if(esp>=MIN_REAL_SPEED_KMH&&esp<=MAX_REASONABLE_SPEED_KMH)return esp;if(real>=MIN_REAL_SPEED_KMH&&real<=MAX_REASONABLE_SPEED_KMH)return real;return 0}
@@ -161,17 +172,16 @@ function processGPS(data){
 
   setText("motion",motion); setText("motionTop",motion);
   setText("latlon",lat.toFixed(7)+", "+lon.toFixed(7));
-  setText("sat",sat); setText("satTop",sat);
+  setText("sat",sat); setText("satTop",sat); updateGpsSignal(sat);
   setText("speed",displaySpeed.toFixed(2)+" km/h"); setText("speedTop",displaySpeed.toFixed(2));
-  setText("rawSpeed",rawSpeed.toFixed(2)+" km/h (input "+rawInput.toFixed(2)+")");
-  setText("drift",movedFromCurrent.toFixed(1)+" m");
   setText("totalDistance",formatDistance(totalDistance)); setText("totalTop",formatDistance(totalDistance));
   setText("maxSpeedTop",maxSpeed.toFixed(2));
   setText("onlineTime",formatDuration(now-firstOnlineTime));
-  setText("seqtime",`${seq} / ${new Date(lastFreshTime).toLocaleString("th-TH")}`);
+  const updateTimeText=new Date(lastFreshTime).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  setText("updateTime",updateTimeText); setText("updateTimeTop",updateTimeText);
   const googleURL=`https://www.google.com/maps?q=${lat},${lon}`;
   document.getElementById("googleMapsBtn").href=googleURL;
-  marker.setPopupContent(`<b>🚚 รถขนส่ง</b><br>Connection: ${document.getElementById("status").textContent}<br>Motion: ${motion}<br>Speed: ${displaySpeed.toFixed(2)} km/h<br>Raw: ${rawSpeed.toFixed(2)} km/h<br>Input: ${rawInput.toFixed(2)}<br>Sat: ${sat}<br>Total: ${formatDistance(totalDistance)}<br>Seq: ${seq}`);
+  marker.setPopupContent(`<b>🚚 รถขนส่ง</b><br>สถานะ: ${document.getElementById("status").textContent}<br>โหมดรถ: ${motion}<br>ความเร็ว: ${displaySpeed.toFixed(2)} km/h<br>ดาวเทียม: ${sat} ดวง<br>สัญญาณ GPS: ${getGpsSignal(sat).text}<br>ระยะทาง: ${formatDistance(totalDistance)}<br>อัปเดตล่าสุด: ${new Date(lastFreshTime).toLocaleTimeString("th-TH")}`);
   updateCurrentPlace(lat,lon,isMovingNow);
   if(isFirstLoad){ if(!viewingHistory) map.setView([lat,lon],17); marker.openPopup(); isFirstLoad=false; }
 }
