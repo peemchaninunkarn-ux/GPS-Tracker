@@ -1,12 +1,23 @@
-GPS Tracking System — Professional UI
+# GPS Tracking System – Professional Single-file UI
 
-สิ่งที่ปรับในชุดนี้:
-- ปรับโครงสร้างเมนูด้านข้างให้เป็นหมวดหมู่และดูเป็นระบบมากขึ้น
-- ไม่มีการเพิ่มข้อมูลทะเบียนรถ คนขับ หรือข้อมูลรถด้านบนของ Sidebar
-- คง Dashboard เดิม 5 รายการตามที่ตกลง
-- เมนูอื่น ๆ มี ติดตามรถ, แสดง/ซ่อนเส้นทาง และล้างเส้นทาง
-- ปรับปุ่ม การ์ด แผนที่ Drawer และ Dark Mode ให้ดูทันสมัยขึ้น
-- Popup แสดงเฉพาะข้อมูลสำคัญ
-- ไม่แก้ Logic GPS, Firebase, ความเร็ว, สถานะรถ, Marker หรือรอบการอ่านข้อมูล
+เวอร์ชันนี้ปรับเฉพาะหน้าตาและการจัดเมนู โดยยังคง CSS และ JavaScript ทั้งหมดไว้ภายใน `index.html` ไฟล์เดียว
 
-ให้อัปโหลดไฟล์ทั้งหมดไว้ที่ root ของ GitHub Repository GPS-Tracker แล้วรอ GitHub Pages deploy
+## สิ่งที่ปรับ
+- Header: GPS Tracking System
+- Dashboard คง 5 การ์ดเดิม
+- Sidebar เปลี่ยนเป็น “เมนูระบบ” และไม่เพิ่มข้อมูลทะเบียน/คนขับ/ข้อมูลรถส่วนเกิน
+- เมนู “อื่น ๆ” รวม ติดตามรถ / แสดงหรือซ่อนเส้นทาง / ล้างเส้นทาง
+- Popup และแผนที่ปรับให้ดูเป็นทางการและทันสมัย
+- รองรับมือถือ แท็บเล็ต คอมพิวเตอร์ และ PWA
+- ไม่แยก `style.css`, `app.js`, `history.js`, `ui.js`
+- ไม่แก้ Logic GPS, Firebase, ความเร็ว, สถานะ, Marker หรือรอบอัปเดต
+
+## ไฟล์ที่ให้อัปโหลดขึ้น GitHub root
+- `index.html`
+- `manifest.webmanifest`
+- `service-worker.js`
+- `icon-192.png`
+- `icon-512.png`
+- `GPS_Firebase_A7670E_GPS_TRACKING_STABLE.ino`
+
+หลังอัปโหลด ให้รอ GitHub Pages deploy แล้วรีเฟรชแบบไม่ใช้แคช หรือลบแอปเดิมและติดตั้งใหม่เพื่อให้ UI ใหม่แสดงผล
