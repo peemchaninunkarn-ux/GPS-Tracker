@@ -23,6 +23,34 @@ body.dark{--bg:#08111f;--surface:#101b2d;--surface-2:#132239;--text:#eef6ff;--mu
  .dashboard{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{padding:14px;min-height:110px}.card-value{font-size:24px}.speed-card{grid-column:span 2}.map-panel{min-height:460px;border-radius:20px}.map-header{height:52px;padding:0 14px}#map{height:52vh;min-height:390px}.top-actions .icon-btn:first-child{display:none}
 }
 @media(max-width:480px){.app-shell{padding:10px}.dashboard{gap:9px}.card{min-height:104px;border-radius:16px}.card-title{font-size:11px}.card-value{font-size:22px}.map-panel{border-radius:18px}#map{height:50vh;min-height:360px}.map-heading{font-size:14px}.brand-title{font-size:17px}}
+
+/* Compact mobile drawer requested by user */
+.drawer-head{position:relative;display:flex;align-items:center;justify-content:flex-start;min-height:64px;padding:8px 44px 16px 4px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.drawer-head h2{margin:0;font-size:30px;font-weight:850;line-height:1.1}
+.close-btn{display:none}
+.menu-section{border-bottom:1px solid var(--line);padding:12px 0}
+.menu-section:last-child{border-bottom:0}
+.menu-section-title{display:flex;align-items:center;gap:11px;color:var(--primary);font-size:18px;font-weight:850;margin:0 0 8px;padding:10px 12px}
+.menu-link,.menu-action{display:flex!important;align-items:center;gap:12px;width:100%;border:0!important;background:transparent!important;color:var(--text)!important;padding:12px 14px!important;margin:0!important;border-radius:12px!important;text-align:left!important;font-size:16px!important;font-weight:650!important;box-shadow:none!important;text-decoration:none!important}
+.menu-link:hover,.menu-action:hover{background:var(--primary-soft)!important;transform:none!important}
+.menu-icon{width:24px;text-align:center;font-size:20px;flex:0 0 24px}
+.current-details{border:0;margin:0;background:transparent}
+.current-details>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:14px;background:var(--primary-soft);color:var(--primary);font-size:18px;font-weight:850}
+.current-details>summary::-webkit-details-marker{display:none}
+.current-details>summary:after{content:'⌄';margin-left:auto;font-size:18px;transition:transform .2s}
+.current-details[open]>summary:after{transform:rotate(180deg)}
+.current-details .info-list{padding:8px 8px 0}
+.current-details .row{padding:9px 4px}
+.history-panel.menu-history{margin:0;border:0;border-radius:0;background:transparent;padding:0}
+.history-panel.menu-history h3{display:flex;align-items:center;gap:11px;color:var(--primary);font-size:18px;margin:0 0 8px;padding:10px 12px}
+.history-extra{margin-top:10px;padding:10px;border-radius:14px;background:var(--surface-2)}
+@media(max-width:980px){
+ .sidebar{width:min(92vw,520px);padding:calc(12px + env(safe-area-inset-top,0px)) 18px calc(24px + var(--safe-bottom));border-radius:0 24px 24px 0}
+ .drawer-head{position:sticky;top:0;z-index:5;background:var(--surface);min-height:64px;padding:10px 42px 14px 4px}
+ .drawer-head h2{font-size:30px}
+ .close-btn{display:block!important;position:absolute!important;top:13px!important;right:4px!important;width:28px!important;height:28px!important;min-width:28px!important;min-height:28px!important;padding:0!important;margin:0!important;border:0!important;border-radius:50%!important;background:transparent!important;color:var(--muted)!important;font-size:18px!important;font-weight:400!important;line-height:28px!important;text-align:center!important;box-shadow:none!important;place-items:unset!important}
+ .close-btn:hover,.close-btn:active{background:var(--surface-2)!important;transform:none!important}
+}
 </style></head><body>
 <header class="topbar">
   <div class="brand"><div class="brand-mark"><img src="/GPS-Tracker/icon-192.png" alt="GPS Tracking System"></div><div><div class="brand-title">GPS Tracking System</div><div class="brand-subtitle">ระบบติดตามยานพาหนะ</div></div></div>
@@ -32,41 +60,53 @@ body.dark{--bg:#08111f;--surface:#101b2d;--surface-2:#132239;--text:#eef6ff;--mu
 <div class="app-shell">
  <aside class="sidebar" id="sideDrawer">
   <div class="drawer-head"><h2>เมนู</h2><button class="close-btn" onclick="closeMenu()" aria-label="ปิดเมนู">×</button></div>
-  <div class="info-list">
-   <div class="row"><span class="label">สถานที่ปัจจุบัน</span><span id="currentPlace" class="value">กำลังรอข้อมูล...</span></div>
-   <div class="row"><span class="label">สถานะ</span><span id="status" class="value waiting">รอข้อมูล...</span></div>
-   <div class="row"><span class="label">สถานะการเคลื่อนที่</span><span id="motion" class="value">-</span></div>
-   <div class="row"><span class="label">พิกัด</span><span id="latlon" class="value">-</span></div>
-   <div class="row"><span class="label">ดาวเทียม</span><span id="sat" class="value">-</span></div>
-   <div class="row"><span class="label">ระดับสัญญาณ GPS</span><span id="gpsSignal" class="value waiting">รอข้อมูล...</span></div>
-   <div class="row"><span class="label">ความเร็ว</span><span id="speed" class="value">-</span></div>
-   <div class="row"><span class="label">ระยะทาง</span><span id="totalDistance" class="value">0 m</span></div>
-   <div class="row"><span class="label">เวลาที่ระบบออนไลน์</span><span id="onlineTime" class="value">-</span></div>
-   <div class="row"><span class="label">อัปเดตล่าสุด</span><span id="updateTime" class="value last-update-value">-</span></div>
-  </div>
-  <a id="googleMapsBtn" class="btn btn-primary" target="_blank">เปิดใน Google Maps</a>
-  <button class="btn-soft" onclick="toggleAutoFollow()" id="autoFollowBtn">🧭 Auto Follow: ON</button>
-  <button class="btn-dark" onclick="toggleDarkMode()">🌙 Dark Mode</button>
-  <details class="more-menu"><summary>⚙️ อื่น ๆ</summary><div class="more-menu-content">
-    <button class="btn-green" onclick="followCar()">📍 ติดตามรถ</button>
-    <button id="routeToggleBtn" class="btn-gray" onclick="toggleRoute()">🛣 ซ่อนเส้นทาง</button>
-    <button class="btn-danger" onclick="clearLiveRoute()">🧹 ล้างเส้นทาง</button>
-  </div></details>
-  <button class="btn-purple" onclick="installApp()" id="installBtn">📱 ติดตั้งเป็นแอป</button>
-  <div class="history-panel"><h3>ประวัติการวิ่ง</h3>
-    <button class="btn-purple" onclick="loadHistoryRoute()">โหลดประวัติจาก Firebase</button>
-    <button class="btn-teal" onclick="showLiveRoute()">กลับไปดูเส้นทาง</button>
-    <button class="btn-gray" onclick="exportHistoryCSV()">ดาวน์โหลด CSV</button>
-    <button class="btn-orange" onclick="replayHistoryRoute()">▶ เล่นเส้นทางย้อนหลัง</button>
-    <button class="btn-danger" onclick="stopReplay()">■ หยุดการเล่น</button>
-    <div class="row"><span class="label">จำนวนจุดประวัติ</span><span id="historyCount" class="value">0 จุด</span></div>
-    <div class="row"><span class="label">ระยะทางประวัติ</span><span id="historyDistance" class="value">0 m</span></div>
-    <div class="row"><span class="label">ความเร็วสูงสุดในประวัติ</span><span id="historyMaxSpeed" class="value">0.00 km/h</span></div>
-    <div class="row"><span class="label">สถานที่เริ่มต้น</span><span id="startPlace" class="value">-</span></div>
-    <div class="row"><span class="label">สถานที่สุดท้าย</span><span id="endPlace" class="value">-</span></div>
-    <table class="history-table"><thead><tr><th>จุด</th><th>เวลา/ลำดับ</th><th>สถานที่</th><th>ความเร็ว</th></tr></thead><tbody id="historyTableBody"><tr><td colspan="4">ยังไม่ได้โหลดประวัติ</td></tr></tbody></table>
-    <div class="mini">ชื่อสถานที่ใช้ OpenStreetMap Nominatim และต้องเชื่อมต่ออินเทอร์เน็ต</div>
-  </div>
+
+  <section class="menu-section">
+   <details class="current-details">
+    <summary><span class="menu-icon">◴</span>ข้อมูลปัจจุบัน</summary>
+    <div class="info-list">
+     <div class="row"><span class="label">สถานที่ปัจจุบัน</span><span id="currentPlace" class="value">กำลังรอข้อมูล...</span></div>
+     <div class="row"><span class="label">สถานะ</span><span id="status" class="value waiting">รอข้อมูล...</span></div>
+     <div class="row"><span class="label">สถานะการเคลื่อนที่</span><span id="motion" class="value">-</span></div>
+     <div class="row"><span class="label">พิกัด</span><span id="latlon" class="value">-</span></div>
+     <div class="row"><span class="label">ดาวเทียม</span><span id="sat" class="value">-</span></div>
+     <div class="row"><span class="label">ระดับสัญญาณ GPS</span><span id="gpsSignal" class="value waiting">รอข้อมูล...</span></div>
+     <div class="row"><span class="label">ความเร็ว</span><span id="speed" class="value">-</span></div>
+     <div class="row"><span class="label">ระยะทาง</span><span id="totalDistance" class="value">0 m</span></div>
+     <div class="row"><span class="label">เวลาที่ระบบออนไลน์</span><span id="onlineTime" class="value">-</span></div>
+     <div class="row"><span class="label">อัปเดตล่าสุด</span><span id="updateTime" class="value last-update-value">-</span></div>
+    </div>
+   </details>
+   <a id="googleMapsBtn" class="menu-link" target="_blank"><span class="menu-icon">📍</span>เปิด Google Maps</a>
+  </section>
+
+  <section class="menu-section">
+   <div class="history-panel menu-history"><h3><span class="menu-icon">↶</span>ประวัติการเดินทาง</h3>
+    <button class="menu-action" onclick="loadHistoryRoute()"><span class="menu-icon">▤</span>โหลดประวัติ</button>
+    <button class="menu-action" onclick="replayHistoryRoute()"><span class="menu-icon">▷</span>Replay เส้นทาง</button>
+    <button class="menu-action" onclick="exportHistoryCSV()"><span class="menu-icon">⇩</span>Export CSV</button>
+    <button class="menu-action" onclick="showLiveRoute()"><span class="menu-icon">↩</span>กลับไปดูเส้นทาง</button>
+    <button class="menu-action" onclick="stopReplay()"><span class="menu-icon">■</span>หยุด Replay</button>
+    <div class="history-extra">
+     <div class="row"><span class="label">จำนวนจุดประวัติ</span><span id="historyCount" class="value">0 จุด</span></div>
+     <div class="row"><span class="label">ระยะทางประวัติ</span><span id="historyDistance" class="value">0 m</span></div>
+     <div class="row"><span class="label">ความเร็วสูงสุดในประวัติ</span><span id="historyMaxSpeed" class="value">0.00 km/h</span></div>
+     <div class="row"><span class="label">สถานที่เริ่มต้น</span><span id="startPlace" class="value">-</span></div>
+     <div class="row"><span class="label">สถานที่สุดท้าย</span><span id="endPlace" class="value">-</span></div>
+     <table class="history-table"><thead><tr><th>จุด</th><th>เวลา/ลำดับ</th><th>สถานที่</th><th>ความเร็ว</th></tr></thead><tbody id="historyTableBody"><tr><td colspan="4">ยังไม่ได้โหลดประวัติ</td></tr></tbody></table>
+    </div>
+   </div>
+  </section>
+
+  <section class="menu-section">
+   <div class="menu-section-title"><span class="menu-icon">⚙</span>อื่น ๆ</div>
+   <button class="menu-action" onclick="followCar()"><span class="menu-icon">⌖</span>ติดตามรถ</button>
+   <button id="routeToggleBtn" class="menu-action" onclick="toggleRoute()"><span class="menu-icon">⌁</span>ซ่อนเส้นทาง</button>
+   <button class="menu-action" onclick="clearLiveRoute()"><span class="menu-icon">♲</span>ล้างเส้นทาง</button>
+   <button class="menu-action" onclick="toggleAutoFollow()" id="autoFollowBtn"><span class="menu-icon">◎</span>Auto Follow: ON</button>
+   <button class="menu-action" onclick="toggleDarkMode()"><span class="menu-icon">◐</span>Dark Mode</button>
+   <button class="menu-action" onclick="installApp()" id="installBtn"><span class="menu-icon">⇩</span>ติดตั้งเป็นแอป</button>
+  </section>
  </aside>
  <main class="content">
   <section class="dashboard">
