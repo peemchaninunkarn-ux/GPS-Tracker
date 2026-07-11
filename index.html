@@ -11,7 +11,7 @@ body.dark{--bg:#08111f;--surface:#101b2d;--surface-2:#132239;--text:#eef6ff;--mu
 .topbar{height:72px;padding:0 24px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1200;box-shadow:0 8px 28px rgba(15,95,173,.26)}
 .brand{display:flex;align-items:center;gap:13px}.brand-mark{width:44px;height:44px;border-radius:15px;background:rgba(255,255,255,.16);display:grid;place-items:center;overflow:hidden;border:1px solid rgba(255,255,255,.22)}.brand-mark img{width:100%;height:100%;object-fit:cover;display:block}.brand-title{font-size:21px;font-weight:800;letter-spacing:.1px}.brand-subtitle{font-size:12px;opacity:.78;margin-top:2px}.top-actions{display:flex;gap:9px}.icon-btn{width:42px;height:42px;border:0;border-radius:13px;background:rgba(255,255,255,.15);color:white;font-size:19px;cursor:pointer;display:grid;place-items:center}.menu-btn{display:none}
 .app-shell{display:grid;grid-template-columns:330px minmax(0,1fr);gap:18px;padding:18px;max-width:1680px;margin:auto}.sidebar{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:18px;max-height:calc(100vh - 108px);overflow:auto}.drawer-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:13px;margin-bottom:10px}.drawer-head h2{margin:0;font-size:17px}.close-btn{display:none}
-.vehicle-summary{padding:16px;border-radius:18px;background:linear-gradient(145deg,var(--primary-soft),var(--surface));border:1px solid #cfe5fb;margin-bottom:14px}.vehicle-title{font-weight:800;font-size:16px}.vehicle-caption{font-size:12px;color:var(--muted);margin-top:4px}.info-list{display:grid;gap:2px}.row{padding:11px 2px;border-bottom:1px solid var(--line)}.label{display:block;font-size:11px;letter-spacing:.35px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}.value{display:block;font-weight:700;font-size:14px;line-height:1.35;word-break:break-word}.online{color:var(--green)}.offline{color:var(--red)}.waiting{color:var(--amber)}.signal-good{color:var(--green)}.signal-medium{color:var(--amber)}.signal-weak{color:var(--red)}
+.sidebar-section{margin-top:14px}.sidebar-section:first-of-type{margin-top:0}.section-label{display:flex;align-items:center;gap:8px;margin:0 0 8px;padding:0 2px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.55px;text-transform:uppercase}.section-label:after{content:"";height:1px;flex:1;background:var(--line)}.info-panel{padding:4px 12px;border:1px solid var(--line);border-radius:17px;background:var(--surface-2)}.info-list{display:grid;gap:2px}.action-panel{padding:4px 12px 12px;border:1px solid var(--line);border-radius:17px;background:var(--surface-2)}.sidebar-footer{margin-top:16px;padding:14px;text-align:center;border-top:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.55}.row{padding:11px 2px;border-bottom:1px solid var(--line)}.label{display:block;font-size:11px;letter-spacing:.35px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}.value{display:block;font-weight:700;font-size:14px;line-height:1.35;word-break:break-word}.online{color:var(--green)}.offline{color:var(--red)}.waiting{color:var(--amber)}.signal-good{color:var(--green)}.signal-medium{color:var(--amber)}.signal-weak{color:var(--red)}
 .btn,.sidebar button{width:100%;border:0;border-radius:14px;padding:12px 14px;margin-top:9px;font-weight:750;font-size:14px;cursor:pointer;text-decoration:none;text-align:center;display:block;transition:transform .15s ease,filter .15s ease}.btn:hover,.sidebar button:hover{transform:translateY(-1px);filter:brightness(1.03)}.btn-primary{background:var(--primary);color:white}.btn-soft{background:var(--primary-soft);color:var(--primary)}.btn-dark{background:#172033;color:white}.btn-purple{background:#6d49c8;color:white}.btn-teal{background:#0f8f83;color:white}.btn-orange{background:#e98913;color:white}.btn-danger{background:#d73a45;color:white}.btn-gray{background:#526174;color:white}.btn-green{background:#159447;color:white}
 .more-menu{margin-top:12px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface-2)}.more-menu summary{list-style:none;cursor:pointer;padding:13px 14px;font-weight:800;display:flex;align-items:center;justify-content:space-between}.more-menu summary::-webkit-details-marker{display:none}.more-menu summary:after{content:'⌄';font-size:20px}.more-menu[open] summary:after{transform:rotate(180deg)}.more-menu-content{padding:0 12px 12px}
 .content{min-width:0;display:grid;gap:18px}.dashboard{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.card{position:relative;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow-sm);overflow:hidden}.card:after{content:'';position:absolute;width:70px;height:70px;border-radius:50%;right:-24px;top:-28px;background:var(--primary-soft)}.card-icon{font-size:19px;margin-bottom:10px}.card-title{font-size:12px;color:var(--muted);font-weight:700}.card-value{font-size:22px;font-weight:850;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card-unit{font-size:12px;color:var(--muted);font-weight:650}.speed-card{background:linear-gradient(145deg,#0f5fad,#2389df);color:white;border-color:transparent}.speed-card .card-title,.speed-card .card-unit{color:rgba(255,255,255,.78)}.speed-card:after{background:rgba(255,255,255,.12)}
@@ -31,29 +31,40 @@ body.dark{--bg:#08111f;--surface:#101b2d;--surface-2:#132239;--text:#eef6ff;--mu
 <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeMenu()"></div>
 <div class="app-shell">
  <aside class="sidebar" id="sideDrawer">
-  <div class="drawer-head"><h2>ข้อมูลรถขนส่ง</h2><button class="close-btn" onclick="closeMenu()">×</button></div>
-  <div class="vehicle-summary"><div class="vehicle-title">รถติดตาม GPS</div><div class="vehicle-caption">ข้อมูลตำแหน่งและสถานะล่าสุด</div></div>
-  <div class="info-list">
-   <div class="row"><span class="label">สถานที่ปัจจุบัน</span><span id="currentPlace" class="value">กำลังรอข้อมูล...</span></div>
-   <div class="row"><span class="label">สถานะ</span><span id="status" class="value waiting">รอข้อมูล...</span></div>
-   <div class="row"><span class="label">สถานะการเคลื่อนที่</span><span id="motion" class="value">-</span></div>
-   <div class="row"><span class="label">พิกัด</span><span id="latlon" class="value">-</span></div>
-   <div class="row"><span class="label">ดาวเทียม</span><span id="sat" class="value">-</span></div>
-   <div class="row"><span class="label">ระดับสัญญาณ GPS</span><span id="gpsSignal" class="value waiting">รอข้อมูล...</span></div>
-   <div class="row"><span class="label">ความเร็ว</span><span id="speed" class="value">-</span></div>
-   <div class="row"><span class="label">ระยะทาง</span><span id="totalDistance" class="value">0 m</span></div>
-   <div class="row"><span class="label">เวลาที่ระบบออนไลน์</span><span id="onlineTime" class="value">-</span></div>
-   <div class="row"><span class="label">อัปเดตล่าสุด</span><span id="updateTime" class="value last-update-value">-</span></div>
-  </div>
-  <a id="googleMapsBtn" class="btn btn-primary" target="_blank">เปิดใน Google Maps</a>
-  <button class="btn-soft" onclick="toggleAutoFollow()" id="autoFollowBtn">🧭 Auto Follow: ON</button>
-  <button class="btn-dark" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+  <div class="drawer-head"><h2>เมนูระบบ</h2><button class="close-btn" onclick="closeMenu()">×</button></div>
+
+  <section class="sidebar-section">
+   <div class="section-label">ข้อมูลปัจจุบัน</div>
+   <div class="info-panel"><div class="info-list">
+    <div class="row"><span class="label">สถานที่ปัจจุบัน</span><span id="currentPlace" class="value">กำลังรอข้อมูล...</span></div>
+    <div class="row"><span class="label">สถานะ</span><span id="status" class="value waiting">รอข้อมูล...</span></div>
+    <div class="row"><span class="label">สถานะการเคลื่อนที่</span><span id="motion" class="value">-</span></div>
+    <div class="row"><span class="label">พิกัด</span><span id="latlon" class="value">-</span></div>
+    <div class="row"><span class="label">ดาวเทียม</span><span id="sat" class="value">-</span></div>
+    <div class="row"><span class="label">ระดับสัญญาณ GPS</span><span id="gpsSignal" class="value waiting">รอข้อมูล...</span></div>
+    <div class="row"><span class="label">ความเร็ว</span><span id="speed" class="value">-</span></div>
+    <div class="row"><span class="label">ระยะทาง</span><span id="totalDistance" class="value">0 m</span></div>
+    <div class="row"><span class="label">เวลาที่ระบบออนไลน์</span><span id="onlineTime" class="value">-</span></div>
+    <div class="row"><span class="label">อัปเดตล่าสุด</span><span id="updateTime" class="value last-update-value">-</span></div>
+   </div></div>
+  </section>
+
+  <section class="sidebar-section">
+   <div class="section-label">การใช้งาน</div>
+   <div class="action-panel">
+    <a id="googleMapsBtn" class="btn btn-primary" target="_blank">เปิดใน Google Maps</a>
+    <button class="btn-soft" onclick="toggleAutoFollow()" id="autoFollowBtn">🧭 Auto Follow: ON</button>
+    <button class="btn-dark" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+    <button class="btn-purple" onclick="installApp()" id="installBtn">📱 ติดตั้งเป็นแอป</button>
+   </div>
+  </section>
+
   <details class="more-menu"><summary>⚙️ อื่น ๆ</summary><div class="more-menu-content">
     <button class="btn-green" onclick="followCar()">📍 ติดตามรถ</button>
     <button id="routeToggleBtn" class="btn-gray" onclick="toggleRoute()">🛣 ซ่อนเส้นทาง</button>
     <button class="btn-danger" onclick="clearLiveRoute()">🧹 ล้างเส้นทาง</button>
   </div></details>
-  <button class="btn-purple" onclick="installApp()" id="installBtn">📱 ติดตั้งเป็นแอป</button>
+
   <div class="history-panel"><h3>ประวัติการวิ่ง</h3>
     <button class="btn-purple" onclick="loadHistoryRoute()">โหลดประวัติจาก Firebase</button>
     <button class="btn-teal" onclick="showLiveRoute()">กลับไปดูเส้นทาง</button>
@@ -68,6 +79,7 @@ body.dark{--bg:#08111f;--surface:#101b2d;--surface-2:#132239;--text:#eef6ff;--mu
     <table class="history-table"><thead><tr><th>จุด</th><th>เวลา/ลำดับ</th><th>สถานที่</th><th>ความเร็ว</th></tr></thead><tbody id="historyTableBody"><tr><td colspan="4">ยังไม่ได้โหลดประวัติ</td></tr></tbody></table>
     <div class="mini">ชื่อสถานที่ใช้ OpenStreetMap Nominatim และต้องเชื่อมต่ออินเทอร์เน็ต</div>
   </div>
+  <div class="sidebar-footer">GPS Tracking System<br>Professional Interface</div>
  </aside>
  <main class="content">
   <section class="dashboard">
