@@ -221,13 +221,22 @@ function processGPS(data){
   const deviceMillis=data.deviceMillis??"-";
 
   const sig=[lat.toFixed(7),lon.toFixed(7),espSpeed.toFixed(2),rawSpeed.toFixed(2),seq,deviceMillis].join('|');
-  const isNewData = sig !== lastSignature;
-  if(isNewData){
-    lastSignature=sig;
-    lastFreshTime=now;
-    if(!firstOnlineTime) firstOnlineTime=now;
+
+  // ข้อมูลครั้งแรกที่เว็บอ่านจาก Firebase อาจเป็นข้อมูลเก่าที่ค้างอยู่
+  // จึงใช้เป็น baseline ก่อน และจะ online ก็ต่อเมื่อข้อมูลเปลี่ยนจริงในรอบถัดไป
+  const hadBaseline = lastSignature !== null;
+  const isNewData = hadBaseline && sig !== lastSignature;
+
+  if(lastSignature === null){
+    lastSignature = sig;
+  }else if(isNewData){
+    lastSignature = sig;
+    lastFreshTime = now;
+    if(!firstOnlineTime) firstOnlineTime = now;
   }
-  setStatus((now-lastFreshTime<=OFFLINE_LIMIT_MS)?"online":"offline");
+
+  const deviceOnline = lastFreshTime > 0 && (now-lastFreshTime<=OFFLINE_LIMIT_MS);
+  setStatus(deviceOnline ? "online" : "offline");
 
   const oldLat=currentLat, oldLon=currentLon;
   const movedFromCurrent=map.distance([currentLat,currentLon],[lat,lon]);
@@ -237,13 +246,14 @@ function processGPS(data){
 
   // ถ้าข้อมูลใหม่และพิกัดขยับชัดเจน ให้ถือว่ากำลังวิ่ง แม้ speed ชั่วขณะเป็น 0
   const movedClearly = isNewData && movedFromCurrent >= 6;
-  const isMovingNow = selectedSpeed >= 3 || movedClearly;
+  const isMovingNow = deviceOnline && (selectedSpeed >= 3 || movedClearly);
   const motion = isMovingNow ? "กำลังวิ่ง" : "จอดอยู่";
+  if(!deviceOnline) selectedSpeed = 0;
 
   if(isFirstLoad){
     currentLat=lat; currentLon=lon;
     lastAcceptedLat=lat; lastAcceptedLon=lon; lastAcceptedTime=now;
-    displaySpeed=selectedSpeed;
+    displaySpeed=deviceOnline?selectedSpeed:0;
     marker.setLatLng([lat,lon]);
     updateRoute(lat,lon);
   }else if(isNewData){
@@ -257,7 +267,7 @@ function processGPS(data){
       if(movedFromCurrent>=GPS_MOVE_THRESHOLD_M) totalDistance+=movedFromCurrent;
     }
     lastAcceptedLat=lat; lastAcceptedLon=lon; lastAcceptedTime=now;
-    displaySpeed = isMovingNow ? selectedSpeed : 0;
+    displaySpeed = (deviceOnline && isMovingNow) ? selectedSpeed : 0;
   }
 
   if(displaySpeed>maxSpeed) maxSpeed=displaySpeed;
@@ -268,12 +278,14 @@ function processGPS(data){
   setText("speed",displaySpeed.toFixed(2)+" km/h"); setText("speedTop",displaySpeed.toFixed(2));
   setText("totalDistance",formatDistance(totalDistance)); setText("totalTop",formatDistance(totalDistance));
   setText("maxSpeedTop",maxSpeed.toFixed(2));
-  setText("onlineTime",formatDuration(now-firstOnlineTime));
-  const updateTimeText=new Date(lastFreshTime).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  setText("onlineTime",deviceOnline&&firstOnlineTime?formatDuration(now-firstOnlineTime):"-");
+  const updateTimeText=lastFreshTime
+    ? new Date(lastFreshTime).toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit",second:"2-digit"})
+    : "ไม่มีข้อมูลใหม่";
   setText("updateTime",updateTimeText);
   const googleURL=`https://www.google.com/maps?q=${lat},${lon}`;
   document.getElementById("googleMapsBtn").href=googleURL;
-  marker.setPopupContent(`<b>🚚 รถขนส่ง</b><br>สถานะ: ${document.getElementById("status").textContent}<br>โหมดรถ: ${motion}<br>ความเร็ว: ${displaySpeed.toFixed(2)} km/h<br>ดาวเทียม: ${sat} ดวง<br>สัญญาณ GPS: ${getGpsSignal(sat).text}<br>ระยะทาง: ${formatDistance(totalDistance)}<br>อัปเดตล่าสุด: ${new Date(lastFreshTime).toLocaleTimeString("th-TH")}`);
+  marker.setPopupContent(`<b>🚚 รถขนส่ง</b><br>สถานะ: ${deviceOnline?"online":"offline"}<br>โหมดรถ: ${motion}<br>ความเร็ว: ${(deviceOnline?displaySpeed:0).toFixed(2)} km/h<br>ดาวเทียม: ${deviceOnline?sat:"-"} ดวง<br>สัญญาณ GPS: ${deviceOnline?getGpsSignal(sat).text:"ไม่มีข้อมูลล่าสุด"}<br>ระยะทาง: ${formatDistance(totalDistance)}<br>อัปเดตล่าสุด: ${updateTimeText}`);
   updateCurrentPlace(lat,lon,isMovingNow);
   if(isFirstLoad){ if(!viewingHistory) map.setView([lat,lon],17); marker.openPopup(); isFirstLoad=false; }
 }
@@ -297,8 +309,20 @@ async function loadHistoryByTimeRange(){
  }catch(e){console.error(e);alert("โหลดประวัติตามช่วงเวลาไม่สำเร็จ");setText("historyCount","โหลดไม่สำเร็จ")}
 }
 function stopReplay(){if(replayTimer){clearInterval(replayTimer);replayTimer=null}if(replayMarker){map.removeLayer(replayMarker);replayMarker=null}}function replayHistoryRoute(){if(!historyPoints||historyPoints.length<2){alert("กรุณาโหลดประวัติก่อน");return}stopReplay();let i=0;replayMarker=L.marker([historyPoints[0].lat,historyPoints[0].lon],{icon:truckIcon}).addTo(map).bindPopup("Replay");map.setView([historyPoints[0].lat,historyPoints[0].lon],17);replayTimer=setInterval(()=>{i++;if(i>=historyPoints.length){stopReplay();return}const p=historyPoints[i];replayMarker.setLatLng([p.lat,p.lon]);map.panTo([p.lat,p.lon],{animate:true,duration:.2})},250)}async function exportHistoryCSV(){if(!historyPoints.length){alert("กรุณากดโหลดประวัติก่อน");return}const rows=[["date","time","sequence","deviceMillis","latitude","longitude","place","speed_kmh","satellites"]];for(const p of historyPoints){const place=placeCache[placeKey(p.lat,p.lon)]||"";rows.push([p.localDate,p.localTime,p.sequence,p.deviceMillis,p.lat,p.lon,'"'+String(place).replaceAll('"','""')+'"',p.speed,p.sat])}const blob=new Blob([rows.map(r=>r.join(",")).join("\n")],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="gps_history.csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}
-function applyOfflineDisplay(){setStatus("offline");setText("motion","ไม่ทราบสถานะ");setText("motionTop","-");setText("speed","-");setText("speedTop","-");setText("sat","-");setText("satTop","-");const g=document.getElementById("gpsSignal");if(g){g.textContent="ไม่มีข้อมูลล่าสุด";g.className="value waiting"}marker.setPopupContent(`<b>🚚 รถขนส่ง</b><br>สถานะ: offline<br>ไม่มีข้อมูลใหม่จากอุปกรณ์<br>ตำแหน่งบนแผนที่คือตำแหน่งล่าสุดที่ได้รับ`)}
-setInterval(()=>{if(lastFreshTime&&Date.now()-lastFreshTime>OFFLINE_LIMIT_MS)applyOfflineDisplay()},1000);loadGPS();setInterval(loadGPS,LIVE_REFRESH_MS);
+function applyOfflineDisplay(){
+  setStatus("offline");
+  displaySpeed=0;
+  setText("motion","จอดอยู่");
+  setText("motionTop","จอดอยู่");
+  setText("speed","0.00 km/h");
+  setText("speedTop","0.00");
+  setText("sat","-");
+  setText("satTop","-");
+  const g=document.getElementById("gpsSignal");
+  if(g){g.textContent="ไม่มีข้อมูลล่าสุด";g.className="value waiting"}
+  marker.setPopupContent(`<b>🚚 รถขนส่ง</b><br>สถานะ: offline<br>โหมดรถ: จอดอยู่<br>ความเร็ว: 0.00 km/h<br>ไม่มีข้อมูลใหม่จากอุปกรณ์<br>ตำแหน่งบนแผนที่คือตำแหน่งล่าสุดที่ได้รับ`);
+}
+setInterval(()=>{if(!lastFreshTime || Date.now()-lastFreshTime>OFFLINE_LIMIT_MS)applyOfflineDisplay()},1000);loadGPS();setInterval(loadGPS,LIVE_REFRESH_MS);
 (function(){const h=document.getElementById('historyMenuDetails');if(h)h.open=false;})();
 (function initHistoryDate(){const d=new Date();const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');const el=document.getElementById('historyDate');if(el)el.value=`${y}-${m}-${day}`})();
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e});async function installApp(){if(deferredInstallPrompt){deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null}else alert('iPhone: กด Share แล้วเลือก Add to Home Screen\nAndroid: เปิดผ่าน Chrome แล้วเลือก Install app/Add to Home screen')}if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/GPS-Tracker/service-worker.js', {scope:'/GPS-Tracker/'}).catch(console.log))}
