@@ -15,7 +15,7 @@ body.dark{--bg:#08111f;--surface:#101b2d;--surface-2:#132239;--text:#eef6ff;--mu
 .btn,.sidebar button{width:100%;border:0;border-radius:14px;padding:12px 14px;margin-top:9px;font-weight:750;font-size:14px;cursor:pointer;text-decoration:none;text-align:center;display:block;transition:transform .15s ease,filter .15s ease}.btn:hover,.sidebar button:hover{transform:translateY(-1px);filter:brightness(1.03)}.btn-primary{background:var(--primary);color:white}.btn-soft{background:var(--primary-soft);color:var(--primary)}.btn-dark{background:#172033;color:white}.btn-purple{background:#6d49c8;color:white}.btn-teal{background:#0f8f83;color:white}.btn-orange{background:#e98913;color:white}.btn-danger{background:#d73a45;color:white}.btn-gray{background:#526174;color:white}.btn-green{background:#159447;color:white}
 .more-menu{margin-top:12px;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface-2)}.more-menu summary{list-style:none;cursor:pointer;padding:13px 14px;font-weight:800;display:flex;align-items:center;justify-content:space-between}.more-menu summary::-webkit-details-marker{display:none}.more-menu summary:after{content:'⌄';font-size:20px}.more-menu[open] summary:after{transform:rotate(180deg)}.more-menu-content{padding:0 12px 12px}
 .content{min-width:0;display:grid;gap:18px}.dashboard{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.card{position:relative;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow-sm);overflow:hidden}.card:after{content:'';position:absolute;width:70px;height:70px;border-radius:50%;right:-24px;top:-28px;background:var(--primary-soft)}.card-icon{font-size:19px;margin-bottom:10px}.card-title{font-size:12px;color:var(--muted);font-weight:700}.card-value{font-size:22px;font-weight:850;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card-unit{font-size:12px;color:var(--muted);font-weight:650}.speed-card{background:linear-gradient(145deg,#0f5fad,#2389df);color:white;border-color:transparent}.speed-card .card-title,.speed-card .card-unit{color:rgba(255,255,255,.78)}.speed-card:after{background:rgba(255,255,255,.12)}
-.map-panel{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);overflow:hidden;position:relative;min-height:610px}.map-header{height:58px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.map-heading{font-size:16px;font-weight:850}.map-meta{font-size:12px;color:var(--muted)}#map{width:100%;height:552px}.map-fab{position:absolute;right:18px;bottom:22px;z-index:700;width:50px;height:50px;border-radius:16px;border:0;background:var(--primary);color:#fff;font-size:20px;box-shadow:0 10px 25px rgba(15,95,173,.35);cursor:pointer}.vehicle-icon{font-size:37px;filter:drop-shadow(0 4px 5px rgba(0,0,0,.36));transform-origin:center center;transition:transform .35s ease-out}.leaflet-popup-content-wrapper{border-radius:16px;box-shadow:var(--shadow)}
+.map-panel{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);overflow:hidden;position:relative;min-height:610px}.map-header{height:58px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}.map-heading{font-size:16px;font-weight:850}.map-meta{font-size:12px;color:var(--muted)}#map{width:100%;height:552px}.map-fab{position:absolute;right:18px;bottom:22px;z-index:700;width:50px;height:50px;border-radius:16px;border:0;background:var(--primary);color:#fff;font-size:20px;box-shadow:0 10px 25px rgba(15,95,173,.35);cursor:pointer}.vehicle-icon{font-size:37px;filter:drop-shadow(0 4px 5px rgba(0,0,0,.36));transform-origin:center center;transition:transform .18s ease-out}.leaflet-popup-content-wrapper{border-radius:16px;box-shadow:var(--shadow)}
 .history-panel{margin-top:14px;border:1px solid var(--line);border-radius:17px;background:var(--surface-2);padding:13px}.history-panel h3{font-size:15px;margin:0 0 10px}.history-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;background:var(--surface);border-radius:12px;overflow:hidden}.history-table th,.history-table td{padding:8px 7px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.history-table th{background:var(--primary-soft);color:var(--primary)}.place-text{max-width:170px}.mini{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}.drawer-backdrop{display:none}.last-update-value{font-variant-numeric:tabular-nums}
 .history-filter{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}.history-filter .full{grid-column:1/-1}.history-filter label{display:block;font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px}.history-filter input{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--surface);color:var(--text);font:inherit}.history-filter button{grid-column:1/-1;margin-top:2px!important}.history-range-note{font-size:11px;color:var(--muted);line-height:1.45;margin:2px 0 8px}
 @media(max-width:1250px){.dashboard{grid-template-columns:repeat(4,minmax(0,1fr))}.app-shell{grid-template-columns:300px minmax(0,1fr)}}
@@ -190,7 +190,7 @@ function closeMenu(){ document.body.classList.remove('menu-open'); }
 function toggleMenu(){ document.body.classList.toggle('menu-open'); }
 window.addEventListener('keydown', e => { if(e.key === 'Escape') closeMenu(); });
 const map=L.map("map").setView([currentLat,currentLon],13);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap contributors"}).addTo(map);
-const truckIcon=L.divIcon({html:'<div id="truckIcon" class="vehicle-icon">🚚</div>',className:"",iconSize:[42,42],iconAnchor:[21,21]});const marker=L.marker([currentLat,currentLon],{icon:truckIcon}).addTo(map).bindPopup("รอตำแหน่งรถ...");
+const truckIcon=L.divIcon({html:'<div id="truckIcon" class="vehicle-icon">🚚</div>',className:"",iconSize:[42,42],iconAnchor:[21,26]});const marker=L.marker([currentLat,currentLon],{icon:truckIcon}).addTo(map).bindPopup("รอตำแหน่งรถ...");
 function setText(id,v){const e=document.getElementById(id); if(e)e.textContent=v}function setStatus(mode){let text="รอข้อมูล...",cls="waiting";if(mode==="online"){text="online";cls="online"}if(mode==="offline"){text="offline";cls="offline"}setText("status",text);setText("statusTop",text);document.getElementById("status").className="value "+cls;document.getElementById("statusTop").className="card-value "+cls}
 function getGpsSignal(sat){const n=Number(sat)||0;if(n>=16)return{text:"ดีมาก",cls:"signal-good"};if(n>=11)return{text:"ดี",cls:"signal-good"};if(n>=6)return{text:"ปานกลาง",cls:"signal-medium"};return{text:"อ่อน",cls:"signal-weak"}}
 function updateGpsSignal(sat){const s=getGpsSignal(sat);setText("gpsSignal",s.text);setText("gpsSignalTop",s.text);const a=document.getElementById("gpsSignal"),b=document.getElementById("gpsSignalTop");if(a)a.className="value "+s.cls;if(b)b.className="card-value "+s.cls}
@@ -200,16 +200,44 @@ function formatDistance(m){return m>=1000?(m/1000).toFixed(2)+" km":m.toFixed(0)
 function calculateRealSpeed(distanceM,dtMs){if(dtMs<=0)return 0;const kmh=(distanceM/(dtMs/1000))*3.6;if(!isFinite(kmh)||kmh<MIN_REAL_SPEED_KMH||kmh>MAX_REASONABLE_SPEED_KMH)return 0;return kmh}function dynamicMoveThreshold(speedKmh,distanceM){if(speedKmh>=50)return 2;if(speedKmh>=20)return 2.5;if(speedKmh>=8)return 3;if(speedKmh>=MIN_RAW_MOVING_SPEED_KMH)return 4;if(distanceM>=FORCE_MOVE_DISTANCE_M)return FORCE_MOVE_DISTANCE_M;return STOP_DRIFT_THRESHOLD_M}function chooseDisplaySpeed(raw,esp,real,moving){if(!moving)return 0;if(raw>=MIN_RAW_MOVING_SPEED_KMH&&raw<=MAX_REASONABLE_SPEED_KMH)return raw;if(esp>=MIN_REAL_SPEED_KMH&&esp<=MAX_REASONABLE_SPEED_KMH)return esp;if(real>=MIN_REAL_SPEED_KMH&&real<=MAX_REASONABLE_SPEED_KMH)return real;return 0}
 function smoothMoveMarker(a,b,c,d){
   if(smoothTimer)clearInterval(smoothTimer);
+
+  // เริ่มจากตำแหน่งที่ไอคอนอยู่จริงบนจอ ไม่ใช่ตำแหน่งเป้าหมายเก่า
+  const visualStart=marker.getLatLng();
+  const startLat=visualStart.lat,startLon=visualStart.lng;
+
+  // เก็บจุดฐานของเส้นทางไว้ก่อน แล้วให้ปลายเส้นวิ่งตามไอคอน
+  const baseRoute=routePoints.slice();
+
   let step=0;
   smoothTimer=setInterval(()=>{
     step++;
     const t=Math.min(1,step/SMOOTH_STEPS);
     const eased=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
-    const lat=a+(c-a)*eased,lon=b+(d-b)*eased;
+    const lat=startLat+(c-startLat)*eased;
+    const lon=startLon+(d-startLon)*eased;
+
     marker.setLatLng([lat,lon]);
+
+    // ให้เส้นสีน้ำเงินเดินตามตำแหน่งรถจริงบนจอ
+    const visualPoints=baseRoute.concat([[lat,lon]]);
+    if(routeLine){
+      routeLine.setLatLngs(visualPoints);
+    }else{
+      routeLine=L.polyline(visualPoints,{weight:5,opacity:.85,smoothFactor:.3}).addTo(map);
+    }
+    if(routeLine&&!routeVisible && map.hasLayer(routeLine))map.removeLayer(routeLine);
+
     if(step>=SMOOTH_STEPS){
-      clearInterval(smoothTimer);smoothTimer=null;
+      clearInterval(smoothTimer);
+      smoothTimer=null;
       marker.setLatLng([c,d]);
+
+      // เมื่อถึงจุดจริงแล้วค่อยบันทึกจุดนั้นเป็น route point ถาวร
+      if(!routePoints.length || map.distance(routePoints[routePoints.length-1],[c,d])>=ROUTE_POINT_MIN_M){
+        routePoints.push([c,d]);
+        if(routePoints.length>1200)routePoints.shift();
+      }
+      if(routeLine)routeLine.setLatLngs(routePoints);
     }
   },SMOOTH_DELAY_MS);
 }
@@ -276,7 +304,6 @@ function processGPS(data){
       rotateTruck(bearingDeg(oldLat,oldLon,lat,lon));
       smoothMoveMarker(oldLat,oldLon,lat,lon);
       currentLat=lat; currentLon=lon;
-      updateRoute(lat,lon);
       if(autoFollow&&!viewingHistory) map.panTo([lat,lon],{animate:true,duration:1.2});
       if(movedFromCurrent>=GPS_MOVE_THRESHOLD_M) totalDistance+=movedFromCurrent;
     }
