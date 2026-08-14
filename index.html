@@ -182,7 +182,7 @@ body.dark{--bg:#08111f;--surface:#101b2d;--surface-2:#132239;--text:#eef6ff;--mu
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script><script>
 const firebaseURL = "https://gps-tracker-a20ca-default-rtdb.asia-southeast1.firebasedatabase.app/vehicle/location.json";
 const firebaseHistoryURL = "https://gps-tracker-a20ca-default-rtdb.asia-southeast1.firebasedatabase.app/vehicle/history.json";
-const OFFLINE_LIMIT_MS=20000, GPS_MOVE_THRESHOLD_M=1.5, STOP_DRIFT_THRESHOLD_M=10, FORCE_MOVE_DISTANCE_M=8, ROUTE_POINT_MIN_M=1.5, MIN_REAL_SPEED_KMH=2, MIN_RAW_MOVING_SPEED_KMH=5, MAX_REASONABLE_SPEED_KMH=180, SMOOTH_STEPS=3, SMOOTH_DELAY_MS=12, LIVE_REFRESH_MS=2000;
+const OFFLINE_LIMIT_MS=20000, GPS_MOVE_THRESHOLD_M=1.5, STOP_DRIFT_THRESHOLD_M=10, FORCE_MOVE_DISTANCE_M=8, ROUTE_POINT_MIN_M=1.5, MIN_REAL_SPEED_KMH=2, MIN_RAW_MOVING_SPEED_KMH=5, MAX_REASONABLE_SPEED_KMH=180, SMOOTH_STEPS=40, SMOOTH_DELAY_MS=45, LIVE_REFRESH_MS=2000;
 let currentLat=13.7563,currentLon=100.5018,isFirstLoad=true,autoFollow=true,routePoints=[],routeLine=null,routeVisible=true,lastSignature=null,lastFreshTime=0,firstOnlineTime=0,lastAcceptedLat=null,lastAcceptedLon=null,lastAcceptedTime=0,displaySpeed=0,maxSpeed=0,totalDistance=0,smoothTimer=null,lastPlaceLookup=0,placeCache={},historyPoints=[],historyLine=null,historyStartMarker=null,historyEndMarker=null,viewingHistory=false,replayTimer=null,replayMarker=null,deferredInstallPrompt=null;
 
 function openMenu(){const other=document.getElementById('otherMenuDetails');if(other)other.open=false;const h=document.getElementById('historyMenuDetails');if(h)h.open=false;document.body.classList.add('menu-open');}
@@ -198,7 +198,21 @@ function updateGpsSignal(sat){const s=getGpsSignal(sat);setText("gpsSignal",s.te
 function followCar(){map.setView([currentLat,currentLon],17);marker.openPopup()}function toggleAutoFollow(){autoFollow=!autoFollow;setText("autoFollowBtn",autoFollow?"🧭 Auto Follow: ON":"🧭 Auto Follow: OFF")}function toggleDarkMode(){document.body.classList.toggle('dark');localStorage.setItem('gpsDarkMode',document.body.classList.contains('dark')?'1':'0');setTimeout(()=>map.invalidateSize(),200)}if(localStorage.getItem('gpsDarkMode')==='1')document.body.classList.add('dark');
 function formatDistance(m){return m>=1000?(m/1000).toFixed(2)+" km":m.toFixed(0)+" m"}function formatDuration(ms){if(!ms||ms<0)return"-";const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return `${h} ชม. ${m} นาที ${sec} วิ`}function bearingDeg(a,b,c,d){const R=x=>x*Math.PI/180,D=x=>x*180/Math.PI;const y=Math.sin(R(d-b))*Math.cos(R(c));const x=Math.cos(R(a))*Math.sin(R(c))-Math.sin(R(a))*Math.cos(R(c))*Math.cos(R(d-b));return(D(Math.atan2(y,x))+360)%360}function rotateTruck(deg){const el=document.getElementById("truckIcon");if(el)el.style.transform=`rotate(${deg}deg)`}
 function calculateRealSpeed(distanceM,dtMs){if(dtMs<=0)return 0;const kmh=(distanceM/(dtMs/1000))*3.6;if(!isFinite(kmh)||kmh<MIN_REAL_SPEED_KMH||kmh>MAX_REASONABLE_SPEED_KMH)return 0;return kmh}function dynamicMoveThreshold(speedKmh,distanceM){if(speedKmh>=50)return 2;if(speedKmh>=20)return 2.5;if(speedKmh>=8)return 3;if(speedKmh>=MIN_RAW_MOVING_SPEED_KMH)return 4;if(distanceM>=FORCE_MOVE_DISTANCE_M)return FORCE_MOVE_DISTANCE_M;return STOP_DRIFT_THRESHOLD_M}function chooseDisplaySpeed(raw,esp,real,moving){if(!moving)return 0;if(raw>=MIN_RAW_MOVING_SPEED_KMH&&raw<=MAX_REASONABLE_SPEED_KMH)return raw;if(esp>=MIN_REAL_SPEED_KMH&&esp<=MAX_REASONABLE_SPEED_KMH)return esp;if(real>=MIN_REAL_SPEED_KMH&&real<=MAX_REASONABLE_SPEED_KMH)return real;return 0}
-function smoothMoveMarker(a,b,c,d){if(smoothTimer)clearInterval(smoothTimer);let step=0;smoothTimer=setInterval(()=>{step++;const t=step/SMOOTH_STEPS,lat=a+(c-a)*t,lon=b+(d-b)*t;marker.setLatLng([lat,lon]);if(step>=SMOOTH_STEPS){clearInterval(smoothTimer);smoothTimer=null;marker.setLatLng([c,d])}},SMOOTH_DELAY_MS)}
+function smoothMoveMarker(a,b,c,d){
+  if(smoothTimer)clearInterval(smoothTimer);
+  let step=0;
+  smoothTimer=setInterval(()=>{
+    step++;
+    const t=Math.min(1,step/SMOOTH_STEPS);
+    const eased=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    const lat=a+(c-a)*eased,lon=b+(d-b)*eased;
+    marker.setLatLng([lat,lon]);
+    if(step>=SMOOTH_STEPS){
+      clearInterval(smoothTimer);smoothTimer=null;
+      marker.setLatLng([c,d]);
+    }
+  },SMOOTH_DELAY_MS);
+}
 function updateRoute(lat,lon){const p=[lat,lon];if(!routePoints.length)routePoints.push(p);else if(map.distance(routePoints[routePoints.length-1],p)>=ROUTE_POINT_MIN_M)routePoints.push(p);if(routePoints.length>1200)routePoints.shift();if(routeLine)routeLine.setLatLngs(routePoints);else routeLine=L.polyline(routePoints,{weight:5,opacity:.85,smoothFactor:.3}).addTo(map);if(routeLine&&!routeVisible)map.removeLayer(routeLine)}function clearLiveRoute(){routePoints=[];totalDistance=0;maxSpeed=0;setText("totalDistance","0 m");setText("totalTop","0 m");setText("maxSpeedTop","0.00");if(routeLine){map.removeLayer(routeLine);routeLine=null}}function toggleRoute(){
   routeVisible=!routeVisible;
   if(routeLine){routeVisible?routeLine.addTo(map):map.removeLayer(routeLine)}
@@ -259,11 +273,11 @@ function processGPS(data){
   }else if(isNewData){
     // marker/เส้นทางตามพิกัดล่าสุดเสมอ ไม่ให้สถานะจอดมาบล็อก
     if(movedFromCurrent>=0.5){
-      currentLat=lat; currentLon=lon;
       rotateTruck(bearingDeg(oldLat,oldLon,lat,lon));
-      marker.setLatLng([lat,lon]);
+      smoothMoveMarker(oldLat,oldLon,lat,lon);
+      currentLat=lat; currentLon=lon;
       updateRoute(lat,lon);
-      if(autoFollow&&!viewingHistory) map.panTo([lat,lon],{animate:true,duration:.15});
+      if(autoFollow&&!viewingHistory) map.panTo([lat,lon],{animate:true,duration:1.2});
       if(movedFromCurrent>=GPS_MOVE_THRESHOLD_M) totalDistance+=movedFromCurrent;
     }
     lastAcceptedLat=lat; lastAcceptedLon=lon; lastAcceptedTime=now;
